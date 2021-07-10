@@ -29,13 +29,19 @@ namespace checkup
         _curlMessage = curl::create_message(_allocator);
     }
 
-    bool TSession::execute(TRequest& request)
+    bool TSession::execute(TRequest& request, bento::ILogger* logger)
     {
         // Build the request we shall be sending
         bento::DynamicString requestText(_allocator);
         requestText += request.api;
         requestText += "?";
         requestText += request.content;
+
+        if (logger != nullptr)
+            logger->log(bento::LogLevel::info, "Request", requestText.c_str());
+
+        // Clear the message before using it
+        curl::clear_message(_curlMessage);
 
         const char* res = curl::request(_curlInstance, requestText.c_str(), nullptr, 0, nullptr, nullptr, _curlMessage);
         
@@ -56,6 +62,10 @@ namespace checkup
             request.validity = false;
             request.result = "INVALID";
         }
+
+        if (logger != nullptr)
+            logger->log(bento::LogLevel::info, "Result", request.result.c_str());
+
 
         return success;
     }

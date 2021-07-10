@@ -15,6 +15,9 @@ namespace checkup
         // Create a curl message
         CurlMessage* create_message(bento::IAllocator& allocator);
 
+        // Clear a curl message
+        void clear_message(CurlMessage* message);
+
         // Fetch the raw data of the message
         const char* message_raw_data(CurlMessage* message);
 

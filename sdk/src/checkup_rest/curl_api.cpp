@@ -40,6 +40,12 @@ namespace checkup
 			return (CurlMessage*)bento::make_new<bento::DynamicString>(allocator, allocator);
 		}
 
+		void clear_message(CurlMessage* message)
+		{
+			bento::DynamicString* str = (bento::DynamicString*)message;
+			str->resize(0);
+		}
+
 		const char* message_raw_data(CurlMessage* message)
 		{
 			bento::DynamicString* str = (bento::DynamicString*)message;

@@ -21,7 +21,7 @@ namespace checkup
 		void terminate();
 
 		// Interactions
-		bool execute(TRequest& request);
+		bool execute(TRequest& request, bento::ILogger* logger = nullptr);
 
 	private:
 		curl::CurlInstance* _curlInstance;
