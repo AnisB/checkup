@@ -38,8 +38,8 @@ add_subdirectory(${BENTO_SDK_ROOT}/src)
 # Generate the CHECKUP SDK
 add_subdirectory(${CHECKUP_SDK_ROOT}/src)
 
-# Generate the applications
-add_subdirectory(${CHECKUP_CAPI_APPLICATIONS})
-
 # Generate the dynamic library
 add_subdirectory(${CHECKUP_CAPI_ROOT}/src)
+
+# Generate the applications
+add_subdirectory(${CHECKUP_CAPI_APPLICATIONS})

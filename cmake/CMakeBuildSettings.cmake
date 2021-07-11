@@ -62,6 +62,8 @@ macro(define_plaform_settings)
 
 		# Treat all other warnings as errors
 		add_compile_options(-Werror)
+		
+		set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 		# Enable C++11 language, but only for c++ files
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
