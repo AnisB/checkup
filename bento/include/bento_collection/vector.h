@@ -6,8 +6,10 @@
 
 // External includes
 #include <type_traits>
+#include <string.h>
 
-namespace bento {
+namespace bento
+{
 	
 	template <typename T>
 	class Vector
