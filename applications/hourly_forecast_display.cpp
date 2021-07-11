@@ -5,6 +5,7 @@
 #include <bento_tools/disk_serializer.h>
 #include <checkup_rest/session.h>
 #include <checkup_weather/weather.h>
+#include <checkup_weather/forecast.h>
 
 // External includes
 #include <string>
@@ -32,13 +33,17 @@ int main(int argc, char** argv)
     checkup::TRequest request(systemAllocator);
     for (int requestIdx = 0; requestIdx < requestCount; ++requestIdx)
     {
-        // Build and execute the request
+        // Build and execute the weather request
         build_weather_request(argv[2 + requestIdx], argv[1], request);
         session.execute(request);
-
-        // Parse the weather info
         checkup::TWeatherInfo weatherInfo(systemAllocator);
         build_weather_data(request.result, weatherInfo, logger);
+
+        // Build and execute the forecast request
+        build_forecast_request(weatherInfo.latitude, weatherInfo.longitude, argv[1], request);
+        session.execute(request);
+        checkup::TForecastInfo forecastInfo(systemAllocator);
+        build_forecast_data(request.result, forecastInfo, logger);
     }
 
     // Terminate the session

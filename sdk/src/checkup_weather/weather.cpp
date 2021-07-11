@@ -1,49 +1,23 @@
-// SDK includes
+// Bento includes
 #include <bento_base/log.h>
-#include "checkup_rest/weather.h"
+
+// SDK includes
+#include "checkup_weather/weather.h"
 
 // External includes
 #include <json.hpp>
 
 namespace checkup
 {
-    TWeatherCategory string_to_category(const char* category)
+    void build_weather_request(const char* cityName, const char* token, TRequest& request)
     {
-        if (strcmp(category, "Clear") == 0)
-            return TWeatherCategory::Clear;
-        if (strcmp(category, "Clouds") == 0)
-            return TWeatherCategory::Clouds;
-        if (strcmp(category, "Rain") == 0)
-            return TWeatherCategory::Rain;
-        if (strcmp(category, "Snow") == 0)
-            return TWeatherCategory::Snow;
-        if (strcmp(category, "Extreme") == 0)
-            return TWeatherCategory::Extreme;
-        return TWeatherCategory::Invalid;
-    }
-
-    const char* category_to_string(TWeatherCategory category)
-    {
-        switch (category)
-        {
-            case TWeatherCategory::Clear:
-                return "Clear";
-            case TWeatherCategory::Clouds:
-                return "Clouds";
-            case TWeatherCategory::Rain:
-                return "Rain";
-            case TWeatherCategory::Snow:
-                return "Snow";
-            case TWeatherCategory::Extreme:
-                return "Extreme";
-        }
-        return "INVALID";
-    }
-
-    // Temperature conversion
-    float kelvin_to_celcius(float kelvin)
-    {
-        return (kelvin - 273.15f);
+        request.validity = false;
+        request.api = "https://api.openweathermap.org/data/2.5/weather";
+        request.content = "q=";
+        request.content += cityName;
+        request.content += "&appid=";
+        request.content += token;
+        request.result = "INVALID";
     }
 
     bool build_weather_data(const bento::DynamicString& weatherData, TWeatherInfo& weatherInfo, bento::ILogger* logger)
@@ -57,6 +31,10 @@ namespace checkup
             weatherInfo.cityName = pingJsonResponse["name"].get<std::string>().c_str();
             weatherInfo.countryCode = pingJsonResponse["sys"]["country"].get<std::string>().c_str();
             
+            auto coordResult = pingJsonResponse["coord"];
+            weatherInfo.latitude = coordResult["lat"].get<float>();
+            weatherInfo.longitude = coordResult["lon"].get<float>();
+
             auto weatherResult = pingJsonResponse["weather"][0];
             weatherInfo.category = string_to_category(weatherResult["main"].get<std::string>().c_str());
             weatherInfo.description = weatherResult["description"].get<std::string>().c_str();
@@ -72,6 +50,8 @@ namespace checkup
             {
                 logger->log(bento::LogLevel::info, "Country", weatherInfo.countryCode.c_str());
                 logger->log(bento::LogLevel::info, "City", weatherInfo.cityName.c_str());
+                logger->log(bento::LogLevel::info, "Longitude", std::to_string(weatherInfo.longitude).c_str());
+                logger->log(bento::LogLevel::info, "Lattitude", std::to_string(weatherInfo.latitude).c_str());
                 logger->log(bento::LogLevel::info, "Weather", category_to_string(weatherInfo.category));
                 logger->log(bento::LogLevel::info, "Weather Description", weatherInfo.description.c_str());
                 logger->log(bento::LogLevel::info, "Temperature", std::to_string(weatherInfo.temperature).c_str());
