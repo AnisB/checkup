@@ -6,6 +6,7 @@
 	#include <execinfo.h>
 	#include <stdint.h>
 	#include <ctype.h>
+	#include <stdlib.h>
 
 	// Defines
 	#define FUNCTION_NAME __PRETTY_FUNCTION__
