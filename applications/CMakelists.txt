@@ -5,3 +5,6 @@ target_link_libraries("weather_display" "checkup_sdk" "bento_sdk" "${CHECKUP_3RD
 
 bento_exe("hourly_forecast_display" "applications" "hourly_forecast_display.cpp" "${CHECKUP_SDK_INCLUDE};${CHECKUP_3RD_INCLUDE}")
 target_link_libraries("hourly_forecast_display" "checkup_sdk" "bento_sdk" "${CHECKUP_3RD_LIB}/libcurl.lib")
+
+file(COPY "${CHECKUP_3RD_BIN}/libcurl.dll" DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug)
+file(COPY "${CHECKUP_3RD_BIN}/libcurl.dll" DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release)
