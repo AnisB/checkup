@@ -29,6 +29,42 @@ macro(define_plaform_settings)
 		replace_linker_flags("/machine:x64" "/MACHINE:X64")
 		add_compile_options(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE)
 		add_compile_options(-DSECURITY_WIN32)
+	elseif(PLATFORM_LINUX)
+		# Debug information
+		if( ENGINE_USE_DEBUG_INFO )
+			add_compile_options(-g)
+			add_exe_linker_flags("-rdynamic")
+		else()
+			add_compile_options($<$<CONFIG:DEBUG>:-g>)
+			add_exe_linker_flags("-rdynamic" debug)
+		endif()
+
+		# Enable full optimization in dev/release
+		add_compile_options($<$<CONFIG:DEBUG>:-O0> $<$<NOT:$<CONFIG:DEBUG>>:-O3>)
+
+		# Use pipes rather than temporary files for communication between the various stages of compilation
+		add_compile_options(-pipe)
+
+		# Adds support for multithreading with the pthreads library
+		add_compile_options(-pthread)
+
+		# Use fast floating point model
+		add_compile_options(-ffast-math)
+
+		# Disable run-time type information (RTTI)
+		add_compile_options(-fno-rtti)
+
+		# Enable SIMD instructions (SSE3)
+		add_compile_options(-msse3)
+
+		# Disable specific warnings
+		add_compile_options(-Wno-parentheses -Wno-reorder -Wno-missing-braces -Wno-unused-private-field -Wno-return-type-c-linkage)
+
+		# Treat all other warnings as errors
+		add_compile_options(-Werror)
+
+		# Enable C++11 language, but only for c++ files
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 	else()
 		message(FATAL_ERROR "Unknown platform!")
 	endif()
