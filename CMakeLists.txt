@@ -4,6 +4,7 @@ project(checkup)
 # Declare the global variables for the cmake project
 set(BENTO_SDK_ROOT ${PROJECT_SOURCE_DIR}/bento)
 set(CHECKUP_SDK_ROOT ${PROJECT_SOURCE_DIR}/sdk)
+set(CHECKUP_DATA_ROOT ${PROJECT_SOURCE_DIR}/data)
 set(CHECKUP_CAPI_ROOT ${PROJECT_SOURCE_DIR}/c_api)
 set(CHECKUP_CAPI_APPLICATIONS ${PROJECT_SOURCE_DIR}/applications)
 set(CHECKUP_3RD_LIB ${PROJECT_SOURCE_DIR}/3rd/lib)

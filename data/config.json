@@ -1,0 +1,10 @@
+{
+    "cities": [
+    	{"name":"Meudon"}, 
+    	{"name":"Premilhat"}, 
+    	{"name":"Rabat"}
+    ],
+    "open_weather_map": {
+        "token": "999999999999999999999"
+    }
+}
