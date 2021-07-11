@@ -67,6 +67,8 @@ def get_generator_name()
 		generator += "\"Visual Studio 14 2015"
 	elsif $options[:compiler] == "vc16"
 		generator += "\"Visual Studio 16 2019\" "
+	elsif $options[:compiler] == "makefile"
+		generator += "\"Unix Makefiles\""
 	else
 		puts "\nERROR: Compiler '#{$options[:compiler]}' not recognized."
 		exit 1
@@ -76,9 +78,6 @@ def get_generator_name()
 	if not $options[:compiler] =="vc16"
 		if $options[:platform] == "win64"
 			generator += " Win64\" "
-		else
-			puts "\nERROR: Architecture not recognized '#{$options[:platform]}' not recognized."
-			exit 1
 		end
 	end
 
