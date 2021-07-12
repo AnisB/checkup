@@ -2,7 +2,7 @@
 #include <bento_base/log.h>
 
 // SDK includes
-#include "checkup_graphics/platform.h"
+#include "checkup_graphics/native_window.h"
 #include "checkup_graphics/backend.h"
 
 // External includes
@@ -143,7 +143,7 @@ namespace checkup
             TEGLGPUBackend* gpuBackend = bento::make_new<TEGLGPUBackend>(allocator);
 
             /* create a native window */
-            gpuBackend->native_window = (EGLNativeWindowType)create_native_window(windowName, width, height);
+            gpuBackend->native_window = (EGLNativeWindowType)create_native_window(windowName, width, height, allocator);
 
             /* get an EGL display connection */
             gpuBackend->display = eglGetDisplay((EGLNativeDisplayType)get_native_display((TNativeWindowType*)gpuBackend->native_window));

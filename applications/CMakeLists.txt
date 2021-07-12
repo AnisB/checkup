@@ -7,7 +7,7 @@ bento_exe("hourly_forecast_display" "applications" "hourly_forecast_display.cpp"
 target_link_libraries("hourly_forecast_display" "checkup_sdk" "bento_sdk" "${CURL_LIBRARIES}")
 
 bento_exe("clear_color" "applications" "clear_color.cpp" "${CHECKUP_SDK_INCLUDE};${CHECKUP_3RD_INCLUDE}")
-target_link_libraries("clear_color" "checkup_sdk" "bento_sdk" "${CURL_LIBRARIES}" "${EGL_LIBRARIES}" "${GLES2_LIBRARIES}" "${MALI_LIBRARIES}")
+target_link_libraries("clear_color" "checkup_sdk" "bento_sdk" "${CURL_LIBRARIES}" "${EGL_LIBRARIES}" "${GLES2_LIBRARIES}" "${MALI_LIBRARIES}" "${LOG4CPLUS_LIBRARIES}" "${GRAPHICS_LIBRARIES}")
 
 if( PLATFORM_WINDOWS )
 	copy_dependencies(${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug)
