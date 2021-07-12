@@ -135,12 +135,14 @@ namespace checkup
             EGLContext context;
             EGLSurface surface;
             EGLNativeWindowType native_window;
+            bento::IAllocator* allocator;
         };
 
         TGPUBackend* initialize_gpu_backend(const char* windowName, uint32_t width, uint32_t height, bento::IAllocator& allocator)
         {
             // Create the rendering context
             TEGLGPUBackend* gpuBackend = bento::make_new<TEGLGPUBackend>(allocator);
+            gpuBackend-> allocator = &allocator;
 
             /* create a native window */
             gpuBackend->native_window = (EGLNativeWindowType)create_native_window(windowName, width, height, allocator);
@@ -196,6 +198,7 @@ namespace checkup
             eglDestroySurface(gpuBackend->display, gpuBackend->surface);
             eglTerminate(gpuBackend->display);
             destroy_native_window((TNativeWindowType*)gpuBackend->native_window);
+            bento::make_delete<TEGLGPUBackend>(gpuBackend->allocator, gpuBackend);
         }
 
         bool get_backend_state(TGPUBackend* gpuBackendPtr)
