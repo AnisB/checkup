@@ -1,4 +1,4 @@
-#include "checkup_graphics/platform.h"
+#include "checkup_graphics/native_window.h"
 
 #if defined(LINUXPC)
 #include <X11/XLib.h>
