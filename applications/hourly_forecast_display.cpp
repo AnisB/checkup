@@ -38,17 +38,22 @@ int main(int argc, char** argv)
     nlohmann::json jsonConfig = nlohmann::json::parse(str.c_str());
 
     // Grab the token
-    const std::string& owmToken = jsonConfig["open_weather_map"]["token"].get<std::string>();
+    const std::string& owmToken = jsonConfig["tokens"]["open_weather_map"].get<std::string>();
 
-    // Grab the locations
-    auto locationsJson = jsonConfig["cities"];
+    // Grab the viewports
+    auto viewportArrayJson = jsonConfig["viewports"];
 
     // Number of requests that need to be processed
-    uint32_t requestCount = (uint32_t)locationsJson.size();
+    uint32_t viewportCount = (uint32_t)viewportArrayJson.size();
     checkup::TRequest request(systemAllocator);
-    for (uint32_t requestIdx = 0; requestIdx < requestCount; ++requestIdx)
+    for (uint32_t viewportIdx = 0; viewportIdx < viewportCount; ++viewportIdx)
     {
-        const std::string& location = locationsJson[requestIdx]["name"].get<std::string>();
+        // Grab the current viewport
+        auto viewportJson = viewportArrayJson[viewportIdx];
+        if (viewportJson["type"].get<std::string>() != "Weather")
+            continue;
+
+        const std::string& location = viewportJson["name"].get<std::string>();
 
         // Build and execute the weather request
         build_weather_request(location.c_str(), owmToken.c_str(), request);
