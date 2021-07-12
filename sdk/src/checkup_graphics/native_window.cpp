@@ -1,7 +1,7 @@
 #include "checkup_graphics/native_window.h"
 
 #if defined(LINUXPC)
-#include <X11/XLib.h>
+#include <X11/Xlib.h>
 #endif
 
 namespace checkup
@@ -14,6 +14,7 @@ namespace checkup
         {
             Window window;
             Display* display;
+	    bento::IAllocator* allocator;
         };
 
         TNativeWindowType* create_native_window(const char* name, uint32_t width, uint32_t height, bento::IAllocator& allocator)
@@ -42,8 +43,8 @@ namespace checkup
                 CopyFromParent, InputOutput, CopyFromParent, CWEventMask,
                &swa );
 
-            XMapWindow ( linuxWindow->display , win );         // make window visible
-            XStoreName ( linuxWindow->display , win , "EGL" );
+            XMapWindow ( linuxWindow->display , linuxWindow->window );         // make window visible
+            XStoreName ( linuxWindow->display , linuxWindow->window , "EGL" );
 
             return (TNativeWindowType*)linuxWindow;
         }
