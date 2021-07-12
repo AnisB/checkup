@@ -53,7 +53,7 @@ namespace checkup
             TLinuxWindow* linuxWindow = (TLinuxWindow*)window;
             XDestroyWindow(linuxWindow->display, linuxWindow->window);
             XCloseDisplay(linuxWindow->display);
-            bento::make_delete<TLinuxWindow>(linuxWindow->allocator, linuxWindow);
+            bento::make_delete<TLinuxWindow>(*(linuxWindow->allocator), linuxWindow);
         }
 
         TNativeDisplayType* get_native_display(TNativeWindowType* window)
