@@ -10,6 +10,7 @@ set(CHECKUP_CAPI_APPLICATIONS ${PROJECT_SOURCE_DIR}/applications)
 set(CHECKUP_3RD_LIB ${PROJECT_SOURCE_DIR}/3rd/lib)
 set(CHECKUP_3RD_BIN ${PROJECT_SOURCE_DIR}/3rd/bin)
 set(CHECKUP_3RD_INCLUDE ${PROJECT_SOURCE_DIR}/3rd/include)
+set(SDL_GUI_ROOT ${PROJECT_SOURCE_DIR}/sdlgui)
 
 # Set the cmake path variable
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
@@ -30,10 +31,13 @@ message(STATUS "The build identifier is: ${CHECKUP_PLATFORM_NAME}")
 
 # Create the list of allowed files to be included
 set(bento_source_extensions)
-list(APPEND bento_source_extensions ".h" ".cpp" ".inl" ".txt")
+list(APPEND bento_source_extensions ".h" ".cpp" ".inl" ".txt" ".c")
 
 # Compile the bento SDK
 add_subdirectory(${BENTO_SDK_ROOT}/src)
+
+# Compile the SDL GUI LIB
+add_subdirectory(${SDL_GUI_ROOT})
 
 # Generate the CHECKUP SDK
 add_subdirectory(${CHECKUP_SDK_ROOT}/src)
