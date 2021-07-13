@@ -36,10 +36,8 @@
 
 #if defined(_WIN32)
 #include <SDL.h>
-#include <SDL_ttf.h>
 #else
 #include <SDL2/SDL.h>
-#include <SD2/SDL_ttf.h>
 #endif
 #if defined(_WIN32)
 #include <SDL_image.h>
@@ -135,7 +133,11 @@ public:
                 std::vector<float>& func = graph->values();
                 func.resize(48);
                 for (int i = 0; i < 48; ++i)
-                    func[i] = max(forecastInfo.hourlyForecast[i].pop, 0.02);
+                {
+                    func[i] = forecastInfo.hourlyForecast[i].pop, 0.02;
+                    if (func[i] < 0.02)
+                        func[i] = 0.02;
+                }
             }
         }
 
@@ -226,19 +228,29 @@ int main()
         
         // Build and execute the weather request
         build_weather_request(currentViewport.cityName.c_str(), owmToken.c_str(), request);
-        session.execute(request);
+        if (session.execute(request))
+        {
+            // build the weather data
+            auto& curentWeatherInfo = weatherInfoArray[weatherIdx];
+            build_weather_data(request.result, weatherInfoArray[weatherIdx]);
 
-        // build the weather data
-        auto& curentWeatherInfo = weatherInfoArray[weatherIdx];
-        build_weather_data(request.result, weatherInfoArray[weatherIdx]);
-
-        // Build and execute the forecast request
-        build_forecast_request(curentWeatherInfo.latitude, curentWeatherInfo.longitude, owmToken.c_str(), request);
-        session.execute(request);
-
-        // Build the forecast data
-        auto& curentForecastInfo = forecastInfoArray[weatherIdx];
-        build_forecast_data(request.result, curentForecastInfo);
+            // Build and execute the forecast request
+            build_forecast_request(curentWeatherInfo.latitude, curentWeatherInfo.longitude, owmToken.c_str(), request);
+            if (session.execute(request))
+            {
+                // Build the forecast data
+                auto& curentForecastInfo = forecastInfoArray[weatherIdx];
+                build_forecast_data(request.result, curentForecastInfo);
+            }
+            else
+            {
+                bento::default_logger()->log(bento::LogLevel::error, "Invalid Forecast", currentViewport.cityName.c_str());
+            }
+        }
+        else
+        {
+            bento::default_logger()->log(bento::LogLevel::error, "Invalid Forecast", currentViewport.cityName.c_str());
+        }
     }
 
     // Init SDL
