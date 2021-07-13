@@ -2,9 +2,9 @@
 #include <bento_base/log.h>
 
 // External includes
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDL_timer.h>
+#include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
+#include <SDL/SDL_timer.h>
  
 int main(int, char **)
 {
@@ -20,7 +20,6 @@ int main(int, char **)
  
     // controls annimation loop
     int close = 0;
- 
 
     // Set the clear color to black
     SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);
