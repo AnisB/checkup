@@ -52,13 +52,13 @@ macro(define_plaform_settings)
 		add_compile_options(-ffast-math)
 
 		# Disable run-time type information (RTTI)
-		add_compile_options(-fno-rtti)
+		# add_compile_options(-fno-rtti)
 
 		# Enable SIMD instructions (SSE3)
 		add_compile_options(-msse3)
 
 		# Disable specific warnings
-		add_compile_options(-Wno-parentheses -Wno-reorder -Wno-missing-braces -Wno-unused-private-field -Wno-return-type-c-linkage)
+		add_compile_options(-Wno-parentheses -Wno-reorder -Wno-missing-braces -Wno-unused-private-field -Wno-return-type-c-linkage -Wno-narrowing)
 
 		# Treat all other warnings as errors
 		add_compile_options(-Werror)
