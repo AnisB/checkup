@@ -83,8 +83,8 @@ public:
             
             // Set it's size and position
             temperatureWindow.setPosition(Vector2i{(int)((weatherViewport.startX) * width), (int)((weatherViewport.startY + weatherViewport.height * 0.2) * height) });
-            temperatureWindow.setFixedWidth(weatherViewport.width * width * 0.5);
-            temperatureWindow.setFixedHeight((weatherViewport.height-0.2) * height * 0.5);
+            temperatureWindow.setFixedWidth((int)(weatherViewport.width * width * 0.5f));
+            temperatureWindow.setFixedHeight((int)((weatherViewport.height-0.2) * height * 0.5f));
             temperatureWindow.setEnabled(false);
 
             // Parent label of the temporatures
@@ -119,14 +119,14 @@ public:
 
             {
                 auto& rainWindow = wdg<Window>("Precipitation");
-                rainWindow.setPosition(Vector2i{ (int)(weatherViewport.startX * width), (int)((weatherViewport.height * 0.5 + weatherViewport.startY) * height)});
+                rainWindow.setPosition(Vector2i{ (int)(weatherViewport.startX * width), (int)((weatherViewport.height * 0.5f + weatherViewport.startY) * height)});
                 rainWindow.setFixedWidth(weatherViewport.width * width);
-                rainWindow.setFixedHeight(weatherViewport.height * height * 0.5);
+                rainWindow.setFixedHeight(weatherViewport.height * height * 0.5f);
                 rainWindow.setEnabled(false);
                 auto& rainWindowLayout = rainWindow.withLayout<GroupLayout>();
 
                 Graph* graph = rainWindowLayout.add<Graph>("Rain Curves");
-                graph->setFixedHeight(weatherViewport.height * height * 0.3);
+                graph->setFixedHeight(weatherViewport.height * height * 0.3f);
                 graph->setHeader("100%");
                 graph->setFooter("0%");
                 graph->setForegroundColor(Color(weatherViewport.debugColor.x, weatherViewport.debugColor.y, weatherViewport.debugColor.z, 1.0));
@@ -134,9 +134,9 @@ public:
                 func.resize(48);
                 for (int i = 0; i < 48; ++i)
                 {
-                    func[i] = forecastInfo.hourlyForecast[i].pop, 0.02;
-                    if (func[i] < 0.02)
-                        func[i] = 0.02;
+                    func[i] = forecastInfo.hourlyForecast[i].pop, 0.02f;
+                    if (func[i] < 0.02f)
+                        func[i] = 0.02f;
                 }
             }
         }
@@ -320,7 +320,7 @@ int main()
         SDL_RenderPresent(renderer);
 
         // Sleep 300 miliseconds
-        SLEEP_FUNCTION(300);
+        SLEEP_FUNCTION(33);
     }
 
     // Terminate the session
