@@ -11,11 +11,13 @@ target_link_libraries("clear_to_tint" "checkup_sdk" "bento_sdk" "${CURL_LIBRARIE
 
 bento_exe("sdlgui_sample" "applications" "sdlgui_sample.cpp" "${CHECKUP_SDK_INCLUDE};${CHECKUP_3RD_INCLUDE};${SDL2_INCLUDE_DIRS};${SDL_GUI_INCLUDE}")
 
-#if (PLATFORM_WINDOWS)
-target_link_libraries("sdlgui_sample" "checkup_sdk" "bento_sdk" "sdlgui" "${CURL_LIBRARIES}" "${SDL2_LIBRARIES}" "${SDLGUI_LIBRARIES}")
-#elseif (PLATFORM_LINUX)
-target_link_libraries("sdlgui_sample" "checkup_sdk" "bento_sdk" "sdlgui" "${CURL_LIBRARIES}" "${SDL2_LIBRARIES}" "${SDLGUI_LIBRARIES}" -lpthread -lSDL2_image -lSDL2_ttf)
+if (PLATFORM_WINDOWS)
+	target_link_libraries("sdlgui_sample" "checkup_sdk" "bento_sdk" "sdlgui" "${CURL_LIBRARIES}" "${SDL2_LIBRARIES}" "${SDLGUI_LIBRARIES}")
+elseif (PLATFORM_LINUX)
+	target_link_libraries("sdlgui_sample" "checkup_sdk" "bento_sdk" "sdlgui" "${CURL_LIBRARIES}" "${SDL2_LIBRARIES}" "${SDLGUI_LIBRARIES}" -lpthread -lSDL2_image -lSDL2_ttf)
 endif ()
+
+
 if( PLATFORM_WINDOWS )
 	copy_dependencies(${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug)
 	copy_dependencies(${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release)
