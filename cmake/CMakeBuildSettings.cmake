@@ -9,6 +9,7 @@ macro(define_plaform_settings)
 		add_compile_options(/Ot)
 		add_compile_options($<$<NOT:$<CONFIG:DEBUG>>:/GT>)
 		add_compile_options(/GF)
+		add_compile_options(/GR)
 
 		if( PLATFORM_WINDOWS AND RUNTIME_TYPE STREQUAL "mt")
 			add_compile_options($<$<CONFIG:DEBUG>:/MTd> $<$<NOT:$<CONFIG:DEBUG>>:/MT>)
