@@ -6,15 +6,25 @@
             "start_x" : 0.0,
             "start_y" : 0.0,
             "size_x" : 0.5,
-            "size_y" : 0.5
+            "size_y" : 0.5,
+            "tint" : {
+                "r" : 1.0,
+                "g" : 0.5,
+                "b" : 0.0
+            }
         }, 
         {
             "type": "Weather",
-            "name": "Premihalt",
+            "name": "Premilhat",
             "start_x" : 0.5,
             "start_y" : 0.0,
             "size_x" : 0.5,
-            "size_y" : 0.5
+            "size_y" : 0.5,
+            "tint" : {
+                "r" : 0.5,
+                "g" : 1.0,
+                "b" : 0.0
+            }
         }, 
         {
             "type": "Weather",
@@ -22,7 +32,12 @@
             "start_x" : 0.0,
             "start_y" : 0.5,
             "size_x" : 0.5,
-            "size_y" : 0.5
+            "size_y" : 0.5,
+            "tint" : {
+                "r" : 0.5,
+                "g" : 0.0,
+                "b" : 1.0
+            }
         }
     ],
     "tokens": {

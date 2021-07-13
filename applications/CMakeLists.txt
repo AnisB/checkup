@@ -6,6 +6,9 @@ target_link_libraries("weather_display" "checkup_sdk" "bento_sdk" "${CURL_LIBRAR
 bento_exe("hourly_forecast_display" "applications" "hourly_forecast_display.cpp" "${CHECKUP_SDK_INCLUDE};${CHECKUP_3RD_INCLUDE}")
 target_link_libraries("hourly_forecast_display" "checkup_sdk" "bento_sdk" "${CURL_LIBRARIES}")
 
+bento_exe("clear_to_tint" "applications" "clear_to_tint.cpp" "${CHECKUP_SDK_INCLUDE};${CHECKUP_3RD_INCLUDE};${SDL_INCLUDE_DIRS}")
+target_link_libraries("clear_to_tint" "checkup_sdk" "bento_sdk" "${CURL_LIBRARIES}" "${SDL_LIBRARIES}")
+
 if( PLATFORM_WINDOWS )
 	copy_dependencies(${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug)
 	copy_dependencies(${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release)
