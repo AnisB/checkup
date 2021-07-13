@@ -12,12 +12,8 @@
 #include <string>
 #include <json.hpp>
 
-int main(int argc, char** argv)
+int main(int, char**)
 {
-    // Check that the id is there
-    if (argc != 2)
-        return -1;
-
     // Create an allocator for our application
     bento::SystemAllocator systemAllocator;
 
@@ -31,7 +27,7 @@ int main(int argc, char** argv)
     bento::ILogger* logger = bento::default_logger();
     
     // Read the config file to a string
-    std::ifstream istream(argv[1]);
+    std::ifstream istream("config.json");
     std::string str((std::istreambuf_iterator<char>(istream)), std::istreambuf_iterator<char>());
 
     // Parse the config

@@ -100,7 +100,15 @@ TTF_Font* getFont(const char* fontname, size_t ptsize)
     else if (tmpFontname == "icons")
       rw = SDL_RWFromMem(entypo_ttf, entypo_ttf_size);
 
-    TTF_Font* newFont = TTF_OpenFontRW(rw, false, ptsize);
+    TTF_Font* newFont;
+    if (rw != nullptr)
+        newFont = TTF_OpenFontRW(rw, false, ptsize);
+    else
+    {
+        std::string fontPath = fontname;
+        fontPath += ".ttf";
+        newFont = TTF_OpenFont(fontPath.c_str(), ptsize);
+    }
     internal::fonts[fullFontName] = newFont;
     font = newFont;
   }

@@ -6,6 +6,7 @@
 // Bento includes
 #include <bento_base/log.h>
 #include <bento_memory/common.h>
+#include <bento_math/types.h>
 #include <bento_collection/dynamic_string.h>
 
 // SDK includes
@@ -14,6 +15,28 @@
 
 namespace checkup
 {
+    struct TWeatherViewport
+    {
+        ALLOCATOR_BASED;
+        TWeatherViewport(bento::IAllocator& allocator)
+        : _allocator(allocator)
+        , cityName(allocator, "INVALID")
+        , startX(0)
+        , width(0)
+        , height(0)
+        , debugColor()
+        {
+        }
+
+        bento::DynamicString cityName;
+        float startX;
+        float startY;
+        float width;
+        float height;
+        bento::Vector3 debugColor;
+        bento::IAllocator& _allocator;
+    };
+
     struct TWeatherInfo
     {
         ALLOCATOR_BASED;

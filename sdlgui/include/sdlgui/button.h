@@ -56,7 +56,7 @@ public:
     const Color &textColor() const { return mTextColor; }
     void setTextColor(const Color &textColor);
 
-    int icon() const { return mIcon; }
+    int icon() const { return (int) mIcon; }
     void setIcon(int icon) { mIcon = icon; }
 
     int flags() const { return mFlags; }

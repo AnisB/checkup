@@ -47,4 +47,24 @@ namespace checkup
     {
         return (kelvin - 273.15f);
     }
+
+    bento::Vector3 temperature_to_color(float temperature)
+    {
+        bento::Vector3 outColor;
+        if (temperature < 22.0)
+        {
+            float lerpParam = (temperature - 10.0) / (22.0 - 10.0);
+            outColor.x = 0;
+            outColor.y = lerpParam;
+            outColor.z = 1.0 - lerpParam;
+        }
+        else
+        {
+            float lerpParam = (temperature - 22.0) / (22.0 - 30.0);
+            outColor.x = lerpParam;
+            outColor.y = 1.0 - lerpParam;
+            outColor.z = 0.0;
+        }
+        return outColor;
+    }
 }

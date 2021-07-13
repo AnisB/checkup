@@ -3,7 +3,8 @@
 // Base includes
 #include <float.h>
 
-// Bento includes
+// Bento includes 
+#include <bento_math/types.h>
 #include <bento_memory/common.h>
 #include <bento_collection/dynamic_string.h>
 
@@ -15,4 +16,5 @@ namespace checkup
     float kelvin_to_celcius(float kelvin);
     TWeatherCategory string_to_category(const char* category);
     const char* category_to_string(TWeatherCategory category);
+    bento::Vector3 temperature_to_color(float temperature);
 }

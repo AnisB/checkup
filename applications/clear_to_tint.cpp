@@ -9,12 +9,15 @@
 int main(int, char **)
 {
     //  Init SDL
-    if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
         bento::default_logger()->log(bento::LogLevel::error, "SDL Init", SDL_GetError());
     
     // Init window
-    SDL_Window* win = SDL_CreateWindow("Clear To Tint", 0, 0, 1280, 720, 0);
- 
+    SDL_Window* win = SDL_CreateWindow("Clear To Tint", 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+    
+    // Set the window full screen
+    SDL_SetWindowFullscreen(win, SDL_WINDOW_FULLSCREEN_DESKTOP);
+
     // creates a renderer to render our images
     SDL_Renderer* rend = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
  
@@ -35,7 +38,6 @@ int main(int, char **)
             switch (event.type)
             {
                 case SDL_QUIT:
-                case SDL_SCANCODE_F1:
                     close = 1;
                     break;
                 default:
