@@ -131,8 +131,10 @@ public:
                 graph->setFooter("0%");
                 graph->setForegroundColor(Color(weatherViewport.debugColor.x, weatherViewport.debugColor.y, weatherViewport.debugColor.z, 1.0));
                 std::vector<float>& func = graph->values();
-                func.resize(48);
-                for (int i = 0; i < 48; ++i)
+                
+                uint32_t numHours = forecastInfo.hourlyForecast.size();
+                func.resize(numHours);
+                for (uint32_t i = 0; i < numHours; ++i)
                 {
                     func[i] = forecastInfo.hourlyForecast[i].pop, 0.02f;
                     if (func[i] < 0.02f)
@@ -320,7 +322,7 @@ int main()
         SDL_RenderPresent(renderer);
 
         // Sleep 300 miliseconds
-        SLEEP_FUNCTION(33);
+        SLEEP_FUNCTION(300);
     }
 
     // Terminate the session
