@@ -16,9 +16,13 @@ struct TDisplayData
         , forecastInfoArray(allocator)
         , routeViewportArray(allocator)
         , routeInfoArray(allocator)
+        , owmToken(allocator)
+        , hereToken(allocator)
     {
 
     }
+    bento::DynamicString owmToken;
+    bento::DynamicString hereToken;
     bento::Vector<checkup::TWeatherViewport> weatherViewportArray;
     bento::Vector<checkup::TWeatherInfo> weatherInfoArray;
     bento::Vector<checkup::TForecastInfo> forecastInfoArray;

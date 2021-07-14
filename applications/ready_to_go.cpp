@@ -36,16 +36,84 @@
 
 #undef main
 
+void run_rest_requests(TDisplayData& displayData, bento::IAllocator& allocator)
+{
+    // Create a session
+    checkup::TSession session(allocator);
+
+    // Init the session
+    session.init();
+
+    // Temporary request
+    checkup::TRequest request(allocator);
+
+    // Number of weather viewports to handle
+    uint32_t numWeatherViewports = displayData.weatherViewportArray.size();
+    displayData.weatherInfoArray.resize(numWeatherViewports);
+    displayData.forecastInfoArray.resize(numWeatherViewports);
+
+    // Loop throught the viewpots
+    for (uint32_t weatherIdx = 0; weatherIdx < numWeatherViewports; ++weatherIdx)
+    {
+        // Grab the current viewport
+        const checkup::TWeatherViewport& currentViewport = displayData.weatherViewportArray[weatherIdx];
+
+        // Build and execute the weather request
+        build_weather_request(currentViewport.cityName.c_str(), displayData.owmToken.c_str(), request);
+        if (session.execute(request))
+        {
+            // build the weather data
+            auto& curentWeatherInfo = displayData.weatherInfoArray[weatherIdx];
+            build_weather_data(request.result, displayData.weatherInfoArray[weatherIdx]);
+
+            // Build and execute the forecast request
+            build_forecast_request(curentWeatherInfo.latitude, curentWeatherInfo.longitude, displayData.owmToken.c_str(), request);
+            if (session.execute(request))
+            {
+                // Build the forecast data
+                auto& curentForecastInfo = displayData.forecastInfoArray[weatherIdx];
+                build_forecast_data(request.result, curentForecastInfo);
+            }
+            else
+            {
+                bento::default_logger()->log(bento::LogLevel::error, "Invalid Forecast", currentViewport.cityName.c_str());
+            }
+        }
+        else
+        {
+            bento::default_logger()->log(bento::LogLevel::error, "Invalid Forecast", currentViewport.cityName.c_str());
+        }
+    }
+
+    // Number of weather viewports to handle
+    uint32_t numRouteViewports = displayData.routeViewportArray.size();
+    displayData.routeInfoArray.resize(numRouteViewports);
+
+    // Loop throught the viewpots
+    for (uint32_t routeIdx = 0; routeIdx < numRouteViewports; ++routeIdx)
+    {
+        // Grab the current viewport
+        const checkup::TRouteViewport& currentViewport = displayData.routeViewportArray[routeIdx];
+
+        checkup::TransportMode mode = checkup::string_to_transport(currentViewport.vehicle.c_str());
+        build_route_request(currentViewport.origin.c_str(), currentViewport.destination.c_str(), mode, displayData.hereToken.c_str(), request);
+        session.execute(request);
+
+        // Parse the weather info
+        auto& currentRoute = displayData.routeInfoArray[routeIdx];
+        build_route_data(request.result, currentRoute);
+    }
+
+    // Terminate the session
+    session.terminate();
+}
+
 int main()
 {
     // Create an allocator for our application
     bento::SystemAllocator systemAllocator;
 
-    // Create a session
-    checkup::TSession session(systemAllocator);
 
-    // Init the session
-    session.init();
 
     // Grab the logger
     bento::ILogger* logger = bento::default_logger();
@@ -57,18 +125,18 @@ int main()
     // Parse the config
     nlohmann::json jsonConfig = nlohmann::json::parse(str.c_str());
 
+    // The set of weather viewpots
+    TDisplayData displayData(systemAllocator);
+
     // Grab the token
-    const std::string& owmToken = jsonConfig["tokens"]["open_weather_map"].get<std::string>();
-    const std::string& hereToken = jsonConfig["tokens"]["developer_here"].get<std::string>();
+    displayData.owmToken = jsonConfig["tokens"]["open_weather_map"].get<std::string>().c_str();
+    displayData.hereToken = jsonConfig["tokens"]["developer_here"].get<std::string>().c_str();
 
     // Grab the viewports
     auto viewportArrayJson = jsonConfig["viewports"];
 
     // Number of requests that need to be processed
     uint32_t viewportCount = (uint32_t)viewportArrayJson.size();
-
-    // The set of weather viewpots
-    TDisplayData displayData(systemAllocator);
 
     // Loop through the viewports
     for (uint32_t viewportIdx = 0; viewportIdx < viewportCount; ++viewportIdx)
@@ -106,65 +174,9 @@ int main()
             routeViewport.debugColor.z = viewportJson["debug_color"]["b"].get<float>();
         }
     }
-    checkup::TRequest request(systemAllocator);
 
-
-    // Number of weather viewports to handle
-    uint32_t numWeatherViewports = displayData.weatherViewportArray.size();
-    displayData.weatherInfoArray.resize(numWeatherViewports);
-    displayData.forecastInfoArray.resize(numWeatherViewports);
-
-    // Loop throught the viewpots
-    for (uint32_t weatherIdx = 0; weatherIdx < numWeatherViewports; ++weatherIdx)
-    {
-        // Grab the current viewport
-        const checkup::TWeatherViewport& currentViewport = displayData.weatherViewportArray[weatherIdx];
-        
-        // Build and execute the weather request
-        build_weather_request(currentViewport.cityName.c_str(), owmToken.c_str(), request);
-        if (session.execute(request))
-        {
-            // build the weather data
-            auto& curentWeatherInfo = displayData.weatherInfoArray[weatherIdx];
-            build_weather_data(request.result, displayData.weatherInfoArray[weatherIdx]);
-
-            // Build and execute the forecast request
-            build_forecast_request(curentWeatherInfo.latitude, curentWeatherInfo.longitude, owmToken.c_str(), request);
-            if (session.execute(request))
-            {
-                // Build the forecast data
-                auto& curentForecastInfo = displayData.forecastInfoArray[weatherIdx];
-                build_forecast_data(request.result, curentForecastInfo);
-            }
-            else
-            {
-                bento::default_logger()->log(bento::LogLevel::error, "Invalid Forecast", currentViewport.cityName.c_str());
-            }
-        }
-        else
-        {
-            bento::default_logger()->log(bento::LogLevel::error, "Invalid Forecast", currentViewport.cityName.c_str());
-        }
-    }
-
-    // Number of weather viewports to handle
-    uint32_t numRouteViewports = displayData.routeViewportArray.size();
-    displayData.routeInfoArray.resize(numRouteViewports);
-
-    // Loop throught the viewpots
-    for (uint32_t routeIdx = 0; routeIdx < numRouteViewports; ++routeIdx)
-    {
-        // Grab the current viewport
-        const checkup::TRouteViewport& currentViewport = displayData.routeViewportArray[routeIdx];
-
-        checkup::TransportMode mode = checkup::string_to_transport(currentViewport.vehicle.c_str());
-        build_route_request(currentViewport.origin.c_str(), currentViewport.destination.c_str(), mode, hereToken.c_str(), request);
-        session.execute(request);
-
-        // Parse the weather info
-        auto& currentRoute = displayData.routeInfoArray[routeIdx];
-        build_route_data(request.result, currentRoute);
-    }
+    // Run the rest questests
+    run_rest_requests(displayData, systemAllocator);
 
     // Init SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
@@ -201,12 +213,34 @@ int main()
     SDL_CaptureMouse(SDL_FALSE);
 
     // Build the UI
-    ReadyToGoScreen programUI(window, 1280, 720, displayData, systemAllocator);
+    ReadyToGoScreen* programUI = new ReadyToGoScreen(window, 1280, 720, displayData, systemAllocator);
+
+    // Initial update time
+    uint32_t lastUpdate = SDL_GetTicks();
+
+    // Time to rerun the update (10 minutes)
+    const uint32_t updateDuration = 1000 * 60 * 10;
 
     bool quit = false;
     SDL_Event e;
     while(!quit)
     {
+        // If enough time has passed, we need to update everything
+        if ((SDL_GetTicks() - lastUpdate) > updateDuration)
+        {
+            // Re-run the requets
+            run_rest_requests(displayData, systemAllocator);
+
+            // Delete the previous
+            delete programUI;
+
+            // Re-create the UI
+            programUI = new ReadyToGoScreen(window, 1280, 720, displayData, systemAllocator);
+
+            // Update the time
+            lastUpdate = SDL_GetTicks();
+        }
+
         //Handle events on queue
         while( SDL_PollEvent( &e ) != 0 )
         {
@@ -219,7 +253,7 @@ int main()
                 continue;
 
             // Inject the events to the UI
-            programUI.onEvent(e);
+            programUI->onEvent(e);
         }
         
         // Clear the screen black
@@ -227,7 +261,7 @@ int main()
         SDL_RenderClear(renderer);
 
         // Draw the UI
-        programUI.drawAll();
+        programUI->drawAll();
 
         // Render the rect to the screen
         SDL_RenderPresent(renderer);
@@ -235,9 +269,6 @@ int main()
         // Sleep 333 miliseconds
         SDL_Delay(333);
     }
-
-    // Terminate the session
-    session.terminate();
     
     return 0;
 }
