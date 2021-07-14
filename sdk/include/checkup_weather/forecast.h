@@ -1,8 +1,5 @@
 #pragma once
 
-// Base includes
-#include <float.h>
-
 // Bento includes
 #include <bento_base/log.h>
 #include <bento_memory/common.h>
@@ -11,6 +8,9 @@
 // SDK includes
 #include "checkup_weather/weather_category.h"
 #include "checkup_weather/utility.h"
+
+// External includes
+#include <float.h>
 
 namespace checkup
 {
@@ -99,13 +99,11 @@ namespace checkup
         : _allocator(allocator)
         , currentForecast(allocator)
         , hourlyForecast(allocator)
-        //, dailyForecast(allocator)
         {
         }
 
         TCurrentForecastState currentForecast;
         bento::Vector< THourlyForecastState> hourlyForecast;
-        //bento::Vector< TForecastState> dailyForecast;
         bento::IAllocator& _allocator;
     };
 

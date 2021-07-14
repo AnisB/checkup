@@ -5,6 +5,8 @@
 #include "checkup_weather/utility.h"
 
 // External includes
+#include <sstream>
+#include <iomanip>
 
 namespace checkup
 {
@@ -54,6 +56,12 @@ namespace checkup
         return res;
     }
 
+    bool is_day(uint32_t time, uint32_t sunrise, uint32_t sunset)
+    {
+        return (time > sunrise)
+            && (time < sunset);
+    }
+
     bento::Vector3 temperature_to_color(float temperature)
     {
         bento::Vector3 outColor;
@@ -72,5 +80,14 @@ namespace checkup
             outColor.z = 0.0f;
         }
         return outColor;
+    }
+
+    void time_to_string(uint32_t time, bento::DynamicString& outputString)
+    {
+        time_t temp = time;
+        tm* t = std::gmtime(&temp);
+        std::stringstream ss; // or if you're going to print, just input directly into the output stream
+        ss << std::put_time(t, "%Y-%m-%d %I:%M:%S %p");
+        outputString = ss.str().c_str();
     }
 }

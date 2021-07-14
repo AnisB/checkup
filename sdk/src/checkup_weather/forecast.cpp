@@ -21,15 +21,15 @@ namespace checkup
         request.result = "INVALID";
     }
 
-    void build_current_forecast_state_data(const nlohmann::json& graph, TCurrentForecastState& state)
+    void build_current_forecast_state_data(const nlohmann::json& graph, int32_t timeOffset, TCurrentForecastState& state)
     {
         auto weatherResult = graph["weather"][0];
         state.weatherCategory = string_to_category(weatherResult["main"].get<std::string>().c_str());
         state.weatherDescription = weatherResult["description"].get<std::string>().c_str();
 
-        state.time = graph["dt"].get<uint32_t>();
-        state.sunrise = graph["sunrise"].get<uint32_t>();
-        state.sunset = graph["sunset"].get<uint32_t>();
+        state.time = graph["dt"].get<uint32_t>() + timeOffset;
+        state.sunrise = graph["sunrise"].get<uint32_t>() + timeOffset;
+        state.sunset = graph["sunset"].get<uint32_t>() + timeOffset;
         state.temperature = kelvin_to_celcius(graph["temp"].get<float>());
         state.feltTemperature = kelvin_to_celcius(graph["feels_like"].get<float>());
         state.pressure = graph["pressure"].get<uint32_t>();
@@ -91,8 +91,11 @@ namespace checkup
             // Parse the json answer
             auto jsonResponse = nlohmann::json::parse(forecastData.c_str());
 
+            // Ge the timezone offset
+            int32_t timezone_offset = jsonResponse["timezone_offset"].get<int32_t>();
+
             // Fill the current forecast
-            build_current_forecast_state_data(jsonResponse["current"], forecastInfo.currentForecast);
+            build_current_forecast_state_data(jsonResponse["current"], timezone_offset, forecastInfo.currentForecast);
             
             // Fill the hourly forecast
             auto hourly = jsonResponse["hourly"];

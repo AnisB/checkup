@@ -22,6 +22,7 @@ namespace checkup
         : _allocator(allocator)
         , cityName(allocator, "INVALID")
         , startX(0)
+        , startY(0)
         , width(0)
         , height(0)
         , debugColor()

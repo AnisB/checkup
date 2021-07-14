@@ -2,20 +2,6 @@
 #include <fstream>
 #include <string>
 #include <json.hpp>
-#include <sdlgui/screen.h>
-#include <sdlgui/window.h>
-#include <sdlgui/layout.h>
-#include <sdlgui/label.h>
-#include <sdlgui/checkbox.h>
-#include <sdlgui/button.h>
-#include <sdlgui/toolbutton.h>
-#include <sdlgui/popupbutton.h>
-#include <sdlgui/entypo.h>
-#include <sdlgui/messagedialog.h>
-#include <sdlgui/textbox.h>
-#include <sdlgui/imagepanel.h>
-#include <sdlgui/imageview.h>
-#include <sdlgui/graph.h>
 #include <memory>
 
 // SDK includes
@@ -28,6 +14,7 @@
 #include <checkup_weather/utility.h>
 #include <checkup_weather/weather.h>
 #include <checkup_weather/forecast.h>
+#include "ready_to_go/ready_to_go_screen.h"
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -46,120 +33,6 @@
 #endif
 
 #undef main
-
-using namespace sdlgui;
-
-template <typename T>
-std::string to_string_with_precision(const T a_value, const int n = 6)
-{
-    std::ostringstream out;
-    out.precision(n);
-    out << std::fixed << a_value;
-    return out.str();
-}
-
-class ReadyToGoScreen : public Screen
-{
-public:
-    ReadyToGoScreen(SDL_Window* pwindow, int width, int height,
-        const bento::Vector<checkup::TWeatherViewport>& weatherViewportArray,
-        const bento::Vector<checkup::TWeatherInfo>& weatherInfoArray,
-        const bento::Vector<checkup::TForecastInfo>& forecastInfoArray,
-        bento::IAllocator& allocator)
-    : Screen(pwindow, Vector2i(width, height), "Ready To Go")
-    {
-        // Loop through the viewports
-        uint32_t numWeatherViewports = weatherInfoArray.size();
-        for(uint32_t viewportIdx = 0; viewportIdx < numWeatherViewports; ++viewportIdx)
-        {
-            // Grab the current weather data
-            const checkup::TWeatherViewport& weatherViewport = weatherViewportArray[viewportIdx];
-            const checkup::TWeatherInfo& weatherInfo = weatherInfoArray[viewportIdx];
-            const checkup::TForecastInfo& forecastInfo = forecastInfoArray[viewportIdx];
-
-            // Create the window
-            auto& guiWindow = window("Temperature");
-            auto& temperatureWindow = guiWindow.withLayout<GroupLayout>();
-            
-            // Set it's size and position
-            temperatureWindow.setPosition(Vector2i{(int)((weatherViewport.startX) * width), (int)((weatherViewport.startY + weatherViewport.height * 0.2) * height) });
-            temperatureWindow.setFixedWidth((int)(weatherViewport.width * width * 0.5f));
-            temperatureWindow.setFixedHeight((int)((weatherViewport.height-0.2) * height * 0.5f));
-            temperatureWindow.setEnabled(false);
-
-            // Parent label of the temporatures
-            auto& tempLabel = temperatureWindow.label("", "Raleway-Regular", 24);
-            bento::Vector3 color;
-            {
-                auto& boxLayout1 = tempLabel._and().widget().boxlayout(Orientation::Horizontal, Alignment::Middle, 0, 24);
-                // Current temperature
-                color = checkup::temperature_to_color(weatherInfo.temperature);
-                boxLayout1.label("Current:", "Raleway-Regular", 22).setColor(Color(1.0f, 1.0, 1.0, 1.0));
-                boxLayout1.label(to_string_with_precision<float>(weatherInfo.temperature, 2).c_str(), "Raleway-Regular", 22).setColor(Color(color.x, color.y, color.z, 1.0));
-             
-                // Felt temperature
-                color = checkup::temperature_to_color(weatherInfo.feltTemperature);
-                boxLayout1.label("Felt:", "Raleway-Regular", 22).setColor(Color(1.0f, 1.0, 1.0, 1.0));
-                boxLayout1.label(to_string_with_precision<float>(weatherInfo.feltTemperature, 2).c_str(), "Raleway-Regular", 22).setColor(Color(color.x, color.y, color.z, 1.0));
-            }
-
-            {
-                auto& boxLayout2 = tempLabel._and().widget().boxlayout(Orientation::Horizontal, Alignment::Middle, 0, 24);
-                
-                // Max temperature
-                color = checkup::temperature_to_color(weatherInfo.maxTemperature);
-                boxLayout2.label("Max:", "Raleway-Regular", 22).setColor(Color(1.0f, 1.0, 1.0, 1.0));
-                boxLayout2.label(to_string_with_precision<float>(weatherInfo.maxTemperature, 2).c_str(), "Raleway-Regular", 22).setColor(Color(color.x, color.y, color.z, 1.0));
-
-                // Min temperature
-                color = checkup::temperature_to_color(weatherInfo.minTemperature);
-                boxLayout2.label("Min:", "Raleway-Regular", 22).setColor(Color(1.0f, 1.0, 1.0, 1.0));
-                boxLayout2.label(to_string_with_precision<float>(weatherInfo.minTemperature, 2).c_str(), "Raleway-Regular", 22).setColor(Color(color.x, color.y, color.z, 1.0));
-            }
-
-            {
-                auto& rainWindow = wdg<Window>("Precipitation");
-                rainWindow.setPosition(Vector2i{ (int)(weatherViewport.startX * width), (int)((weatherViewport.height * 0.5f + weatherViewport.startY) * height)});
-                rainWindow.setFixedWidth(weatherViewport.width * width);
-                rainWindow.setFixedHeight(weatherViewport.height * height * 0.5f);
-                rainWindow.setEnabled(false);
-                auto& rainWindowLayout = rainWindow.withLayout<GroupLayout>();
-
-                Graph* graph = rainWindowLayout.add<Graph>("Rain Curves");
-                graph->setFixedHeight(weatherViewport.height * height * 0.3f);
-                graph->setHeader("100%");
-                graph->setFooter("0%");
-                graph->setForegroundColor(Color(weatherViewport.debugColor.x, weatherViewport.debugColor.y, weatherViewport.debugColor.z, 1.0));
-                std::vector<float>& func = graph->values();
-                
-                uint32_t numHours = forecastInfo.hourlyForecast.size();
-                func.resize(numHours);
-                for (uint32_t i = 0; i < numHours; ++i)
-                {
-                    func[i] = forecastInfo.hourlyForecast[i].pop, 0.02f;
-                    if (func[i] < 0.02f)
-                        func[i] = 0.02f;
-                }
-            }
-        }
-
-        performLayout(mSDL_Renderer);
-    }
-
-    ~ReadyToGoScreen() { }
-
-    virtual bool keyboardEvent(int key, int scancode, int action, int modifiers)
-    {
-        if (Screen::keyboardEvent(key, scancode, action, modifiers))
-            return true;
-        return false;
-    }
-
-    virtual void draw(SDL_Renderer* renderer)
-    {
-        Screen::draw(renderer);
-    }
-};
 
 int main()
 {
