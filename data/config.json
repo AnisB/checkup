@@ -38,9 +38,28 @@
                 "g" : 0.3,
                 "b" : 0.8
             }
+        },
+        {
+            "type": "Route",
+            "origin": "0.0,0.0",
+            "destination": "0.0,0.0",
+            "start_x" : 0.5,
+            "start_y" : 0.5,
+            "size_x" : 0.5,
+            "size_y" : 0.25
+        },
+        {
+            "type": "Route",
+            "origin": "0.0,0.0",
+            "destination": "0.0,0.0",
+            "start_x" : 0.5,
+            "start_y" : 0.5,
+            "size_x" : 0.5,
+            "size_y" : 0.25
         }
     ],
     "tokens": {
-        "open_weather_map": "999999999999999999999999999"
+        "open_weather_map": "9999999999999999999",
+        "developer_here": "9999999999999999999"
     }
 }
