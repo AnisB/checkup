@@ -164,7 +164,7 @@ void build_weather_hours(const checkup::TForecastInfo& forecastInfo, TWeatherHou
 
 void evaluate_icon_for_weather(checkup::TWeatherCategory category, bool isDay, bento::DynamicString& label)
 {
-    label = "icons/";
+    label = "images/";
     label += category_to_string(category);
     label += isDay ? "_day.png" : "_night.png";
 }
