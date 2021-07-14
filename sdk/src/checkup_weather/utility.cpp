@@ -90,4 +90,20 @@ namespace checkup
         ss << std::put_time(t, "%Y-%m-%d %I:%M:%S %p");
         outputString = ss.str().c_str();
     }
+
+    void duration_to_string(uint32_t duration, bento::DynamicString& outputString)
+    {
+        int hours = (duration / 3600) % 24;
+        int minutes = (duration / 60) % 60;
+        int seconds = (duration % 60);
+
+        std::stringstream ss;
+        if (hours != 0)
+            ss << hours<<"h";
+        if (minutes != 0)
+            ss << minutes << "min";
+        if (seconds != 0)
+            ss << seconds << "s";
+        outputString = ss.str().c_str();
+    }
 }

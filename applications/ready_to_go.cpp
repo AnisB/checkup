@@ -14,6 +14,8 @@
 #include <checkup_weather/utility.h>
 #include <checkup_weather/weather.h>
 #include <checkup_weather/forecast.h>
+#include <checkup_route/route.h>
+#include <checkup_route/utility.h>
 #include "ready_to_go/ready_to_go_screen.h"
 
 #if defined(_WIN32)
@@ -57,6 +59,7 @@ int main()
 
     // Grab the token
     const std::string& owmToken = jsonConfig["tokens"]["open_weather_map"].get<std::string>();
+    const std::string& hereToken = jsonConfig["tokens"]["developer_here"].get<std::string>();
 
     // Grab the viewports
     auto viewportArrayJson = jsonConfig["viewports"];
@@ -65,56 +68,72 @@ int main()
     uint32_t viewportCount = (uint32_t)viewportArrayJson.size();
 
     // The set of weather viewpots
-    bento::Vector<checkup::TWeatherViewport> weatherViewportArray(systemAllocator);
+    TDisplayData displayData(systemAllocator);
 
     // Loop through the viewports
     for (uint32_t viewportIdx = 0; viewportIdx < viewportCount; ++viewportIdx)
     {
         // Grab the current viewport
         auto viewportJson = viewportArrayJson[viewportIdx];
-        if (viewportJson["type"].get<std::string>() != "Weather")
-            continue;
-        
-        // Create new viewport
-        checkup::TWeatherViewport& newWeatherViewport = weatherViewportArray.extend();
-        newWeatherViewport.cityName = viewportJson["name"].get<std::string>().c_str();
-        newWeatherViewport.startX = viewportJson["start_x"].get<float>();
-        newWeatherViewport.startY = viewportJson["start_y"].get<float>();
-        newWeatherViewport.width = viewportJson["size_x"].get<float>();
-        newWeatherViewport.height = viewportJson["size_y"].get<float>();
-        newWeatherViewport.debugColor.x = viewportJson["debug_color"]["r"].get<float>();
-        newWeatherViewport.debugColor.y = viewportJson["debug_color"]["g"].get<float>();
-        newWeatherViewport.debugColor.z = viewportJson["debug_color"]["b"].get<float>();
+        if (viewportJson["type"].get<std::string>() == "Weather")
+        {
+            // Create new viewport
+            checkup::TWeatherViewport& newWeatherViewport = displayData.weatherViewportArray.extend();
+            newWeatherViewport.cityName = viewportJson["name"].get<std::string>().c_str();
+            newWeatherViewport.startX = viewportJson["start_x"].get<float>();
+            newWeatherViewport.startY = viewportJson["start_y"].get<float>();
+            newWeatherViewport.width = viewportJson["size_x"].get<float>();
+            newWeatherViewport.height = viewportJson["size_y"].get<float>();
+            newWeatherViewport.debugColor.x = viewportJson["debug_color"]["r"].get<float>();
+            newWeatherViewport.debugColor.y = viewportJson["debug_color"]["g"].get<float>();
+            newWeatherViewport.debugColor.z = viewportJson["debug_color"]["b"].get<float>();
+        }
+
+        if (viewportJson["type"].get<std::string>() == "Route")
+        {
+            // Create new viewport
+            checkup::TRouteViewport& routeViewport = displayData.routeViewportArray.extend();
+            routeViewport.origin = viewportJson["origin"].get<std::string>().c_str();
+            routeViewport.destination = viewportJson["destination"].get<std::string>().c_str();
+            routeViewport.vehicle = viewportJson["vehicle"].get<std::string>().c_str();
+            routeViewport.name = viewportJson["name"].get<std::string>().c_str();
+            routeViewport.startX = viewportJson["start_x"].get<float>();
+            routeViewport.startY = viewportJson["start_y"].get<float>();
+            routeViewport.width = viewportJson["size_x"].get<float>();
+            routeViewport.height = viewportJson["size_y"].get<float>();
+            routeViewport.debugColor.x = viewportJson["debug_color"]["r"].get<float>();
+            routeViewport.debugColor.y = viewportJson["debug_color"]["g"].get<float>();
+            routeViewport.debugColor.z = viewportJson["debug_color"]["b"].get<float>();
+        }
     }
-
-    // Number of viewports to handle
-    uint32_t numWeatherViewports = weatherViewportArray.size();
-
-    // Allocate the structures that will be updates
     checkup::TRequest request(systemAllocator);
-    bento::Vector<checkup::TWeatherInfo> weatherInfoArray(systemAllocator, numWeatherViewports);
-    bento::Vector<checkup::TForecastInfo> forecastInfoArray(systemAllocator, numWeatherViewports);
+
+
+    // Number of weather viewports to handle
+    uint32_t numWeatherViewports = displayData.weatherViewportArray.size();
+    displayData.weatherInfoArray.resize(numWeatherViewports);
+    displayData.forecastInfoArray.resize(numWeatherViewports);
 
     // Loop throught the viewpots
     for (uint32_t weatherIdx = 0; weatherIdx < numWeatherViewports; ++weatherIdx)
     {
         // Grab the current viewport
-        const checkup::TWeatherViewport& currentViewport = weatherViewportArray[weatherIdx];
+        const checkup::TWeatherViewport& currentViewport = displayData.weatherViewportArray[weatherIdx];
         
         // Build and execute the weather request
         build_weather_request(currentViewport.cityName.c_str(), owmToken.c_str(), request);
         if (session.execute(request))
         {
             // build the weather data
-            auto& curentWeatherInfo = weatherInfoArray[weatherIdx];
-            build_weather_data(request.result, weatherInfoArray[weatherIdx]);
+            auto& curentWeatherInfo = displayData.weatherInfoArray[weatherIdx];
+            build_weather_data(request.result, displayData.weatherInfoArray[weatherIdx]);
 
             // Build and execute the forecast request
             build_forecast_request(curentWeatherInfo.latitude, curentWeatherInfo.longitude, owmToken.c_str(), request);
             if (session.execute(request))
             {
                 // Build the forecast data
-                auto& curentForecastInfo = forecastInfoArray[weatherIdx];
+                auto& curentForecastInfo = displayData.forecastInfoArray[weatherIdx];
                 build_forecast_data(request.result, curentForecastInfo);
             }
             else
@@ -126,6 +145,25 @@ int main()
         {
             bento::default_logger()->log(bento::LogLevel::error, "Invalid Forecast", currentViewport.cityName.c_str());
         }
+    }
+
+    // Number of weather viewports to handle
+    uint32_t numRouteViewports = displayData.routeViewportArray.size();
+    displayData.routeInfoArray.resize(numRouteViewports);
+
+    // Loop throught the viewpots
+    for (uint32_t routeIdx = 0; routeIdx < numRouteViewports; ++routeIdx)
+    {
+        // Grab the current viewport
+        const checkup::TRouteViewport& currentViewport = displayData.routeViewportArray[routeIdx];
+
+        checkup::TransportMode mode = checkup::string_to_transport(currentViewport.vehicle.c_str());
+        build_route_request(currentViewport.origin.c_str(), currentViewport.destination.c_str(), mode, hereToken.c_str(), request);
+        session.execute(request);
+
+        // Parse the weather info
+        auto& currentRoute = displayData.routeInfoArray[routeIdx];
+        build_route_data(request.result, currentRoute);
     }
 
     // Init SDL
@@ -163,7 +201,7 @@ int main()
     SDL_CaptureMouse(SDL_FALSE);
 
     // Build the UI
-    ReadyToGoScreen programUI(window, 1280, 720, weatherViewportArray, weatherInfoArray, forecastInfoArray, systemAllocator);
+    ReadyToGoScreen programUI(window, 1280, 720, displayData, systemAllocator);
 
     bool quit = false;
     SDL_Event e;

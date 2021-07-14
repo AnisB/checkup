@@ -20,4 +20,5 @@ namespace checkup
     bento::Vector3 temperature_to_color(float temperature);
     bool is_day(uint32_t time, uint32_t sunrise, uint32_t sunset);
     void time_to_string(uint32_t time, bento::DynamicString& outputString);
+    void duration_to_string(uint32_t duration, bento::DynamicString& outputString);
 }

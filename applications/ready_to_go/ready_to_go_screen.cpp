@@ -30,7 +30,6 @@ std::string to_string_with_precision(const T a_value, const int n = 6)
     return out.str();
 }
 
-
 struct TWindowRect
 {
     int32_t start_x;
@@ -214,167 +213,32 @@ void display_daily_weather_icon(Widget& layout, const std::map<std::string, SDL_
 }
 
 ReadyToGoScreen::ReadyToGoScreen(SDL_Window* pwindow, int width, int height,
-    const bento::Vector<checkup::TWeatherViewport>& weatherViewportArray,
-    const bento::Vector<checkup::TWeatherInfo>& weatherInfoArray,
-    const bento::Vector<checkup::TForecastInfo>& forecastInfoArray,
+    const TDisplayData& displayData,
     bento::IAllocator& allocator)
     : Screen(pwindow, Vector2i(width, height), "Ready To Go")
     , _allocator(allocator)
-    , forecastInfoArray(forecastInfoArray)
+    , m_displayData(displayData)
+    , m_width(width)
+    , m_height(height)
+    , m_window(pwindow)
 {
-    bento::DynamicString labelBuild(allocator);
-
-    // Load all images
+        // Load all images
     ListImages images = loadImageDirectory(SDL_GetRenderer(pwindow), "images");
     for (auto& icon : images) 
         m_icons[icon.path] = icon.tex;
 
-    // Loop through the viewports
-    uint32_t numWeatherViewports = weatherInfoArray.size();
+    // Loop through the weather viewports
+    uint32_t numWeatherViewports = displayData.weatherInfoArray.size();
     for(uint32_t viewportIdx = 0; viewportIdx < numWeatherViewports; ++viewportIdx)
     {
-        // Grab the current weather data
-        const checkup::TWeatherViewport& weatherViewport = weatherViewportArray[viewportIdx];
-        const checkup::TWeatherInfo& weatherInfo = weatherInfoArray[viewportIdx];
-        const checkup::TForecastInfo& forecastInfo = forecastInfoArray[viewportIdx];
+        weather_viewport(viewportIdx);
+    }
 
-        // Build the layout data
-        TWeatherViewportLayout vl;
-        build_weather_viewport_layout(weatherViewport, width, height, vl);
-
-        // Build the weather 
-        TWeatherHours weatherHours;
-        build_weather_hours(forecastInfo, weatherHours);
-
-        // Evaluate if we are during the day or not
-        bool isDay = checkup::is_day(forecastInfo.currentForecast.time, forecastInfo.currentForecast.sunrise, forecastInfo.currentForecast.sunset);
-        Color debugColor = Color(weatherViewport.debugColor.x, weatherViewport.debugColor.y, weatherViewport.debugColor.z, 1.0);
-        {
-            // Create the window
-            auto& generalWindow = wdg<Window>("General");
-
-            // Set it's size and position
-            generalWindow.setPosition(Vector2i{vl.general.start_x, vl.general.start_y });
-            generalWindow.setFixedWidth(vl.general.size_x);
-            generalWindow.setFixedHeight(vl.general.size_y);
-            generalWindow.setEnabled(false);
-
-            checkup::time_to_string(forecastInfo.currentForecast.time, labelBuild);
-            auto& generalLayout = generalWindow.withLayout<GroupLayout>();
-            auto& tempLabel = generalLayout.label("", "Raleway-Regular", 24);
-            auto& boxLayout = tempLabel._and().widget().boxlayout(Orientation::Horizontal, Alignment::Middle, 0, 32);
-            boxLayout.label(weatherInfo.cityName.c_str(), "Raleway-Regular", 32).setColor(debugColor);
-            Label& currentLabel = boxLayout.label(labelBuild.c_str(), "Raleway-Regular", 32);
-            currentLabel.withId("time-label");
-            currentLabel.setColor(debugColor);
-            m_timeLabels.push_back({ forecastInfo.timeOffset, &currentLabel });
-        }
-        {
-            // Create the window
-            auto& tWindow = wdg<Window>("Temperature");
-
-            // Set it's size and position
-            tWindow.setPosition(Vector2i{ vl.temp.start_x, vl.temp.start_y });
-            tWindow.setFixedWidth(vl.temp.size_x);
-            tWindow.setFixedHeight(vl.temp.size_y);
-            tWindow.setEnabled(false);
-
-            auto& temperatureWindow = tWindow.withLayout<GroupLayout>();
-            // Parent label of the temporatures
-            auto& tempLabel = temperatureWindow.label("", "Raleway-Regular", 12);
-            bento::Vector3 color;
-            {
-                auto& boxLayout1 = tempLabel._and().widget().boxlayout(Orientation::Horizontal, Alignment::Middle, 0, 16);
-                // Current temperature
-                color = checkup::temperature_to_color(weatherInfo.temperature);
-                boxLayout1.label("Current:", "Raleway-Regular", 18).setColor(Color(1.0f, 1.0, 1.0, 1.0));
-                boxLayout1.label(to_string_with_precision<float>(weatherInfo.temperature, 2).c_str(), "Raleway-Regular", 18).setColor(Color(color.x, color.y, color.z, 1.0));
-
-                // Felt temperature
-                color = checkup::temperature_to_color(weatherInfo.feltTemperature);
-                boxLayout1.label("Felt:", "Raleway-Regular", 18).setColor(Color(1.0f, 1.0, 1.0, 1.0));
-                boxLayout1.label(to_string_with_precision<float>(weatherInfo.feltTemperature, 2).c_str(), "Raleway-Regular", 18).setColor(Color(color.x, color.y, color.z, 1.0));
-            }
-
-            {
-                auto& boxLayout2 = tempLabel._and().widget().boxlayout(Orientation::Horizontal, Alignment::Middle, 0, 16);
-
-                // Max temperature
-                color = checkup::temperature_to_color(weatherInfo.maxTemperature);
-                boxLayout2.label("Max:", "Raleway-Regular", 18).setColor(Color(1.0f, 1.0, 1.0, 1.0));
-                boxLayout2.label(to_string_with_precision<float>(weatherInfo.maxTemperature, 2).c_str(), "Raleway-Regular", 18).setColor(Color(color.x, color.y, color.z, 1.0));
-
-                // Min temperature
-                color = checkup::temperature_to_color(weatherInfo.minTemperature);
-                boxLayout2.label("Min:", "Raleway-Regular", 18).setColor(Color(1.0f, 1.0, 1.0, 1.0));
-                boxLayout2.label(to_string_with_precision<float>(weatherInfo.minTemperature, 2).c_str(), "Raleway-Regular", 18).setColor(Color(color.x, color.y, color.z, 1.0));
-            }
-        }
-
-        {
-            auto& img_window = wdg<Window>("J");
-            img_window.setPosition(Vector2i{ vl.weatherD.start_x, vl.weatherD.start_y });
-            img_window.setFixedWidth(vl.weatherD.size_x);
-            img_window.setFixedHeight(vl.weatherD.size_y);
-            img_window.setEnabled(false);
-            auto& layout = img_window.withLayout<GroupLayout>();
-
-            display_hourly_weather_icon(layout, m_icons, weatherHours.morningIdx, 0.25, forecastInfo, vl.weatherD, isDay, allocator);
-            display_hourly_weather_icon(layout, m_icons, weatherHours.afternoonIdx, 0.25, forecastInfo, vl.weatherD, isDay, allocator);
-            display_hourly_weather_icon(layout, m_icons, weatherHours.eveningIdx, 0.25, forecastInfo, vl.weatherD, isDay, allocator);
-        }
-        {
-            auto& img_window = wdg<Window>("J + 1");
-            img_window.setPosition(Vector2i{ vl.weatherD_1.start_x, vl.weatherD_1.start_y });
-            img_window.setFixedWidth(vl.weatherD_1.size_x);
-            img_window.setFixedHeight(vl.weatherD_1.size_y);
-            img_window.setEnabled(false);
-            auto& layout = img_window.withLayout<GroupLayout>();
-
-            display_hourly_weather_icon(layout, m_icons, weatherHours.morningIdx_1, 0.25, forecastInfo, vl.weatherD_1, isDay, allocator);
-            display_hourly_weather_icon(layout, m_icons, weatherHours.afternoonIdx_1, 0.25, forecastInfo, vl.weatherD_1, isDay, allocator);
-            display_hourly_weather_icon(layout, m_icons, weatherHours.eveningIdx_1, 0.25, forecastInfo, vl.weatherD_1, isDay, allocator);
-        }
-
-        {
-            auto& img_window = wdg<Window>("W");
-            img_window.setPosition(Vector2i{ vl.weatherW.start_x, vl.weatherW.start_y });
-            img_window.setFixedWidth(vl.weatherW.size_x);
-            img_window.setFixedHeight(vl.weatherW.size_y);
-            img_window.setEnabled(false);
-            auto& layout = img_window.withLayout<GroupLayout>();
-            layout.setFixedWidth(vl.weatherW.size_x);
-            layout.setFixedHeight(vl.weatherW.size_y);
-
-            display_daily_weather_icon(layout, m_icons, weatherHours.jIdx_2, 0.25, forecastInfo, vl.weatherW, isDay, allocator);
-            display_daily_weather_icon(layout, m_icons, weatherHours.jIdx_3, 0.25, forecastInfo, vl.weatherW, isDay, allocator);
-            display_daily_weather_icon(layout, m_icons, weatherHours.jIdx_4, 0.25, forecastInfo, vl.weatherW, isDay, allocator);
-        }
-        {
-            auto& rainWindow = wdg<Window>("Precipitation");
-            rainWindow.setPosition(Vector2i{ vl.preci.start_x, vl.preci.start_y });
-            rainWindow.setFixedWidth(vl.preci.size_x);
-            rainWindow.setFixedHeight(vl.preci.size_y);
-            rainWindow.setEnabled(false);
-            auto& rainWindowLayout = rainWindow.withLayout<GroupLayout>();
-
-            Graph* graph = rainWindowLayout.add<Graph>("Rain Curves");
-            graph->setFixedHeight((int)(weatherViewport.height * height * 0.3f));
-            graph->setHeader("100%");
-            graph->setFooter("0%");
-            graph->setForegroundColor(debugColor);
-            std::vector<float>& func = graph->values();
-
-            uint32_t numHours = forecastInfo.hourlyForecast.size();
-            numHours = numHours < 24 ? numHours : 24;
-            func.resize(numHours);
-            for (uint32_t i = 0; i < numHours; ++i)
-            {
-                func[i] = forecastInfo.hourlyForecast[i].pop, 0.02f;
-                if (func[i] < 0.02f)
-                    func[i] = 0.02f;
-            }
-        }
+    // Loop through the viewports
+    uint32_t numRouteViewport = displayData.routeViewportArray.size();
+    for (uint32_t viewportIdx = 0; viewportIdx < numRouteViewport; ++viewportIdx)
+    {
+        route_viewport(viewportIdx);
     }
 
     performLayout(mSDL_Renderer);
@@ -383,6 +247,192 @@ ReadyToGoScreen::ReadyToGoScreen(SDL_Window* pwindow, int width, int height,
 ReadyToGoScreen::~ReadyToGoScreen()
 {
 
+}
+
+void ReadyToGoScreen::weather_viewport(int viewportIdx)
+{
+    bento::DynamicString labelBuild(_allocator);
+
+    // Grab the current weather data
+    const checkup::TWeatherViewport& weatherViewport = m_displayData.weatherViewportArray[viewportIdx];
+    const checkup::TWeatherInfo& weatherInfo = m_displayData.weatherInfoArray[viewportIdx];
+    const checkup::TForecastInfo& forecastInfo = m_displayData.forecastInfoArray[viewportIdx];
+
+    // Build the layout data
+    TWeatherViewportLayout vl;
+    build_weather_viewport_layout(weatherViewport, m_width, m_height, vl);
+
+    // Build the weather 
+    TWeatherHours weatherHours;
+    build_weather_hours(forecastInfo, weatherHours);
+
+    // Evaluate if we are during the day or not
+    bool isDay = checkup::is_day(forecastInfo.currentForecast.time, forecastInfo.currentForecast.sunrise, forecastInfo.currentForecast.sunset);
+    Color debugColor = Color(weatherViewport.debugColor.x, weatherViewport.debugColor.y, weatherViewport.debugColor.z, 1.0);
+    {
+        // Create the window
+        auto& generalWindow = wdg<Window>("General");
+
+        // Set it's size and position
+        generalWindow.setPosition(Vector2i{ vl.general.start_x, vl.general.start_y });
+        generalWindow.setFixedWidth(vl.general.size_x);
+        generalWindow.setFixedHeight(vl.general.size_y);
+        generalWindow.setEnabled(false);
+
+        checkup::time_to_string(forecastInfo.currentForecast.time, labelBuild);
+        auto& generalLayout = generalWindow.withLayout<GroupLayout>();
+        auto& tempLabel = generalLayout.label("", "Raleway-Regular", 24);
+        auto& boxLayout = tempLabel._and().widget().boxlayout(Orientation::Horizontal, Alignment::Middle, 0, 32);
+        boxLayout.label(weatherInfo.cityName.c_str(), "Raleway-Regular", 32).setColor(debugColor);
+        Label& currentLabel = boxLayout.label(labelBuild.c_str(), "Raleway-Regular", 32);
+        currentLabel.withId("time-label");
+        currentLabel.setColor(debugColor);
+        m_timeLabels.push_back({ forecastInfo.timeOffset, &currentLabel });
+    }
+    {
+        // Create the window
+        auto& tWindow = wdg<Window>("Temperature");
+
+        // Set it's size and position
+        tWindow.setPosition(Vector2i{ vl.temp.start_x, vl.temp.start_y });
+        tWindow.setFixedWidth(vl.temp.size_x);
+        tWindow.setFixedHeight(vl.temp.size_y);
+        tWindow.setEnabled(false);
+
+        auto& temperatureWindow = tWindow.withLayout<GroupLayout>();
+        // Parent label of the temporatures
+        auto& tempLabel = temperatureWindow.label("", "Raleway-Regular", 12);
+        bento::Vector3 color;
+        {
+            auto& boxLayout1 = tempLabel._and().widget().boxlayout(Orientation::Horizontal, Alignment::Middle, 0, 16);
+            // Current temperature
+            color = checkup::temperature_to_color(weatherInfo.temperature);
+            boxLayout1.label("Current:", "Raleway-Regular", 18).setColor(Color(1.0f, 1.0, 1.0, 1.0));
+            boxLayout1.label(to_string_with_precision<float>(weatherInfo.temperature, 2).c_str(), "Raleway-Regular", 18).setColor(Color(color.x, color.y, color.z, 1.0));
+
+            // Felt temperature
+            color = checkup::temperature_to_color(weatherInfo.feltTemperature);
+            boxLayout1.label("Felt:", "Raleway-Regular", 18).setColor(Color(1.0f, 1.0, 1.0, 1.0));
+            boxLayout1.label(to_string_with_precision<float>(weatherInfo.feltTemperature, 2).c_str(), "Raleway-Regular", 18).setColor(Color(color.x, color.y, color.z, 1.0));
+        }
+
+        {
+            auto& boxLayout2 = tempLabel._and().widget().boxlayout(Orientation::Horizontal, Alignment::Middle, 0, 16);
+
+            // Max temperature
+            color = checkup::temperature_to_color(weatherInfo.maxTemperature);
+            boxLayout2.label("Max:", "Raleway-Regular", 18).setColor(Color(1.0f, 1.0, 1.0, 1.0));
+            boxLayout2.label(to_string_with_precision<float>(weatherInfo.maxTemperature, 2).c_str(), "Raleway-Regular", 18).setColor(Color(color.x, color.y, color.z, 1.0));
+
+            // Min temperature
+            color = checkup::temperature_to_color(weatherInfo.minTemperature);
+            boxLayout2.label("Min:", "Raleway-Regular", 18).setColor(Color(1.0f, 1.0, 1.0, 1.0));
+            boxLayout2.label(to_string_with_precision<float>(weatherInfo.minTemperature, 2).c_str(), "Raleway-Regular", 18).setColor(Color(color.x, color.y, color.z, 1.0));
+        }
+    }
+
+    {
+        auto& img_window = wdg<Window>("J");
+        img_window.setPosition(Vector2i{ vl.weatherD.start_x, vl.weatherD.start_y });
+        img_window.setFixedWidth(vl.weatherD.size_x);
+        img_window.setFixedHeight(vl.weatherD.size_y);
+        img_window.setEnabled(false);
+        auto& layout = img_window.withLayout<GroupLayout>();
+
+        display_hourly_weather_icon(layout, m_icons, weatherHours.morningIdx, 0.25, forecastInfo, vl.weatherD, isDay, _allocator);
+        display_hourly_weather_icon(layout, m_icons, weatherHours.afternoonIdx, 0.25, forecastInfo, vl.weatherD, isDay, _allocator);
+        display_hourly_weather_icon(layout, m_icons, weatherHours.eveningIdx, 0.25, forecastInfo, vl.weatherD, isDay, _allocator);
+    }
+    {
+        auto& img_window = wdg<Window>("J + 1");
+        img_window.setPosition(Vector2i{ vl.weatherD_1.start_x, vl.weatherD_1.start_y });
+        img_window.setFixedWidth(vl.weatherD_1.size_x);
+        img_window.setFixedHeight(vl.weatherD_1.size_y);
+        img_window.setEnabled(false);
+        auto& layout = img_window.withLayout<GroupLayout>();
+
+        display_hourly_weather_icon(layout, m_icons, weatherHours.morningIdx_1, 0.25, forecastInfo, vl.weatherD_1, isDay, _allocator);
+        display_hourly_weather_icon(layout, m_icons, weatherHours.afternoonIdx_1, 0.25, forecastInfo, vl.weatherD_1, isDay, _allocator);
+        display_hourly_weather_icon(layout, m_icons, weatherHours.eveningIdx_1, 0.25, forecastInfo, vl.weatherD_1, isDay, _allocator);
+    }
+
+    {
+        auto& img_window = wdg<Window>("W");
+        img_window.setPosition(Vector2i{ vl.weatherW.start_x, vl.weatherW.start_y });
+        img_window.setFixedWidth(vl.weatherW.size_x);
+        img_window.setFixedHeight(vl.weatherW.size_y);
+        img_window.setEnabled(false);
+        auto& layout = img_window.withLayout<GroupLayout>();
+        layout.setFixedWidth(vl.weatherW.size_x);
+        layout.setFixedHeight(vl.weatherW.size_y);
+
+        display_daily_weather_icon(layout, m_icons, weatherHours.jIdx_2, 0.25, forecastInfo, vl.weatherW, isDay, _allocator);
+        display_daily_weather_icon(layout, m_icons, weatherHours.jIdx_3, 0.25, forecastInfo, vl.weatherW, isDay, _allocator);
+        display_daily_weather_icon(layout, m_icons, weatherHours.jIdx_4, 0.25, forecastInfo, vl.weatherW, isDay, _allocator);
+    }
+    {
+        auto& rainWindow = wdg<Window>("Precipitation");
+        rainWindow.setPosition(Vector2i{ vl.preci.start_x, vl.preci.start_y });
+        rainWindow.setFixedWidth(vl.preci.size_x);
+        rainWindow.setFixedHeight(vl.preci.size_y);
+        rainWindow.setEnabled(false);
+        auto& rainWindowLayout = rainWindow.withLayout<GroupLayout>();
+
+        Graph* graph = rainWindowLayout.add<Graph>("Rain Curves");
+        graph->setFixedHeight((int)(weatherViewport.height * m_height * 0.3f));
+        graph->setHeader("100%");
+        graph->setFooter("0%");
+        graph->setForegroundColor(debugColor);
+        std::vector<float>& func = graph->values();
+
+        uint32_t numHours = forecastInfo.hourlyForecast.size();
+        numHours = numHours < 24 ? numHours : 24;
+        func.resize(numHours);
+        for (uint32_t i = 0; i < numHours; ++i)
+        {
+            func[i] = forecastInfo.hourlyForecast[i].pop, 0.02f;
+            if (func[i] < 0.02f)
+                func[i] = 0.02f;
+        }
+    }
+}
+
+
+void ReadyToGoScreen::route_viewport(int viewportIdx)
+{
+    bento::DynamicString labelBuild(_allocator);
+
+    // Grab the current weather data
+    const checkup::TRouteViewport& routeViewport = m_displayData.routeViewportArray[viewportIdx];
+    const checkup::TRouteInfo& routeInfo = m_displayData.routeInfoArray[viewportIdx];
+    {
+        // Create the window
+        auto& generalWindow = wdg<Window>(routeViewport.vehicle.c_str());
+
+        int displayPadding = 3;
+        int start_x = (int)(routeViewport.startX * m_width + displayPadding);
+        int start_y = (int)(routeViewport.startY * m_height + displayPadding);
+        int size_x = (int)(routeViewport.width * m_width - displayPadding * 2);
+        int size_y = (int)(routeViewport.height * m_height - displayPadding * 2);
+
+        // Set it's size and position
+        generalWindow.setPosition(Vector2i{start_x, start_y });
+        generalWindow.setFixedWidth(size_x);
+        generalWindow.setFixedHeight(size_y);
+        generalWindow.setEnabled(false);
+
+        bento::DynamicString str(_allocator);
+        checkup::duration_to_string(routeInfo.duration, str);
+
+        labelBuild = routeViewport.name.c_str();
+        labelBuild += " ";
+        labelBuild += to_string_with_precision<float>(routeInfo.length, 1).c_str();
+        labelBuild += " km ";
+        labelBuild += str.c_str();
+
+        auto& generalLayout = generalWindow.withLayout<GroupLayout>();
+        generalLayout.label(labelBuild.c_str(), "Raleway-Regular", 24);
+    }
 }
 
 void ReadyToGoScreen::draw(SDL_Renderer* renderer)

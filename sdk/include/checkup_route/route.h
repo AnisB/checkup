@@ -14,6 +14,35 @@
 
 namespace checkup
 {
+    struct TRouteViewport
+    {
+        ALLOCATOR_BASED;
+        TRouteViewport(bento::IAllocator& allocator)
+        : _allocator(allocator)
+        , origin(allocator, "INVALID")
+        , destination(allocator, "INVALID")
+        , name(allocator, "INVALID")
+        , vehicle(allocator, "INVALID")
+        , startX(0)
+        , startY(0)
+        , width(0)
+        , height(0)
+        , debugColor()
+        {
+        }
+
+        bento::DynamicString origin;
+        bento::DynamicString destination;
+        bento::DynamicString name;
+        bento::DynamicString vehicle;
+        float startX;
+        float startY;
+        float width;
+        float height;
+        bento::Vector3 debugColor;
+        bento::IAllocator& _allocator;
+    };
+
 	enum class TransportMode
 	{
 		Car,
