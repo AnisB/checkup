@@ -51,7 +51,7 @@ struct TWeatherViewportLayout
 
 void build_weather_viewport_layout(const checkup::TWeatherViewport& viewport, int width, int height, TWeatherViewportLayout& viewportLayout)
 {
-    int displayPadding = 2;
+    int displayPadding = 3;
     viewportLayout.general.start_x = (int)(viewport.startX * width + displayPadding);
     viewportLayout.general.start_y = (int)(viewport.startY * height);
     viewportLayout.general.size_x = (int)(viewport.width * width - displayPadding*2);
@@ -69,17 +69,17 @@ void build_weather_viewport_layout(const checkup::TWeatherViewport& viewport, in
 
     viewportLayout.weatherD.start_x = (int)((viewport.startX + viewport.width * 0.5) * width + displayPadding);
     viewportLayout.weatherD.start_y = (int)((viewport.startY + 0.25 * viewport.height) * height + displayPadding);
-    viewportLayout.weatherD.size_x = (int)(viewport.width * width * 0.18 - displayPadding * 2);
+    viewportLayout.weatherD.size_x = (int)(viewport.width * width * 0.1666 - displayPadding * 2);
     viewportLayout.weatherD.size_y = (int)(viewport.height * height * 0.75 - displayPadding * 2);
 
-    viewportLayout.weatherD_1.start_x = (int)((viewport.startX + viewport.width * 0.68) * width + displayPadding);
+    viewportLayout.weatherD_1.start_x = (int)((viewport.startX + viewport.width * 0.666) * width + displayPadding);
     viewportLayout.weatherD_1.start_y = (int)((viewport.startY + 0.25 * viewport.height) * height + displayPadding);
-    viewportLayout.weatherD_1.size_x = (int)(viewport.width * width * 0.18 - displayPadding * 2);
+    viewportLayout.weatherD_1.size_x = (int)(viewport.width * width * 0.1666 - displayPadding * 2);
     viewportLayout.weatherD_1.size_y = (int)(viewport.height * height * 0.75 - displayPadding * 2);
 
-    viewportLayout.weatherW.start_x = (int)((viewport.startX + viewport.width * 0.86) * width + displayPadding);
+    viewportLayout.weatherW.start_x = (int)((viewport.startX + viewport.width * 0.8333) * width + displayPadding);
     viewportLayout.weatherW.start_y = (int)((viewport.startY + 0.25 * viewport.height) * height + displayPadding);
-    viewportLayout.weatherW.size_x = (int)(viewport.width * width * 0.14 - displayPadding * 2);
+    viewportLayout.weatherW.size_x = (int)(viewport.width * width * 0.16666 - displayPadding * 2);
     viewportLayout.weatherW.size_y = (int)(viewport.height * height * 0.75 - displayPadding * 2);
 }
 
@@ -93,8 +93,6 @@ struct TWeatherHours
     int32_t afternoonIdx_1;
     int32_t eveningIdx_1;
 
-    int32_t jIdx;
-    int32_t jIdx_1;
     int32_t jIdx_2;
     int32_t jIdx_3;
     int32_t jIdx_4;
@@ -116,8 +114,6 @@ void build_weather_hours(const checkup::TForecastInfo& forecastInfo, TWeatherHou
     weatherHours.afternoonIdx_1 = INT32_MAX;
     weatherHours.eveningIdx_1 = INT32_MAX;
 
-    weatherHours.jIdx = INT32_MAX;
-    weatherHours.jIdx_1 = INT32_MAX;
     weatherHours.jIdx_2 = INT32_MAX;
     weatherHours.jIdx_3 = INT32_MAX;
     weatherHours.jIdx_4 = INT32_MAX;
@@ -160,6 +156,10 @@ void build_weather_hours(const checkup::TForecastInfo& forecastInfo, TWeatherHou
     weatherHours.morningIdx_1 = 24 - currentHour + 8;
     weatherHours.afternoonIdx_1 = 24 - currentHour + 15;
     weatherHours.eveningIdx_1 = 24 - currentHour + 21;
+
+    weatherHours.jIdx_2 = 2;
+    weatherHours.jIdx_3 = 3;
+    weatherHours.jIdx_4 = 4;
 }
 
 void evaluate_icon_for_weather(checkup::TWeatherCategory category, bool isDay, bento::DynamicString& label)
@@ -169,7 +169,7 @@ void evaluate_icon_for_weather(checkup::TWeatherCategory category, bool isDay, b
     label += isDay ? "_day.png" : "_night.png";
 }
 
-void display_weather_icon(Widget& layout, const std::map<std::string, SDL_Texture*>& icons,
+void display_hourly_weather_icon(Widget& layout, const std::map<std::string, SDL_Texture*>& icons,
     int hourIdx, float scale,
     const checkup::TForecastInfo& forecastInfo,
     const TWindowRect& rect,
@@ -194,7 +194,23 @@ void display_weather_icon(Widget& layout, const std::map<std::string, SDL_Textur
         imageView->setFixedWidth(rect.size_y * scale);
         imageView->setFixedHeight(rect.size_y * scale);
     }
+}
 
+void display_daily_weather_icon(Widget& layout, const std::map<std::string, SDL_Texture*>& icons,
+    int dayIdx, float scale,
+    const checkup::TForecastInfo& forecastInfo,
+    const TWindowRect& rect,
+    bool isDay, bento::IAllocator& allocator)
+{
+    bento::DynamicString labelBuild(allocator);
+    evaluate_icon_for_weather(forecastInfo.dailyForecast[dayIdx].weatherCategory, isDay, labelBuild);
+    auto imageIt = icons.find(labelBuild.c_str());
+    if (imageIt != icons.end())
+    {
+        auto imageView = layout.add<ImageView>(imageIt->second);
+        imageView->setFixedWidth(rect.size_y * scale);
+        imageView->setFixedHeight(rect.size_y * scale);
+    }
 }
 
 ReadyToGoScreen::ReadyToGoScreen(SDL_Window* pwindow, int width, int height,
@@ -203,6 +219,8 @@ ReadyToGoScreen::ReadyToGoScreen(SDL_Window* pwindow, int width, int height,
     const bento::Vector<checkup::TForecastInfo>& forecastInfoArray,
     bento::IAllocator& allocator)
     : Screen(pwindow, Vector2i(width, height), "Ready To Go")
+    , _allocator(allocator)
+    , forecastInfoArray(forecastInfoArray)
 {
     bento::DynamicString labelBuild(allocator);
 
@@ -246,7 +264,10 @@ ReadyToGoScreen::ReadyToGoScreen(SDL_Window* pwindow, int width, int height,
             auto& tempLabel = generalLayout.label("", "Raleway-Regular", 24);
             auto& boxLayout = tempLabel._and().widget().boxlayout(Orientation::Horizontal, Alignment::Middle, 0, 32);
             boxLayout.label(weatherInfo.cityName.c_str(), "Raleway-Regular", 32).setColor(debugColor);
-            boxLayout.label(labelBuild.c_str(), "Raleway-Regular", 32).setColor(debugColor);
+            Label& currentLabel = boxLayout.label(labelBuild.c_str(), "Raleway-Regular", 32);
+            currentLabel.withId("time-label");
+            currentLabel.setColor(debugColor);
+            m_timeLabels.push_back({ forecastInfo.timeOffset, &currentLabel });
         }
         {
             // Create the window
@@ -298,9 +319,9 @@ ReadyToGoScreen::ReadyToGoScreen(SDL_Window* pwindow, int width, int height,
             img_window.setEnabled(false);
             auto& layout = img_window.withLayout<GroupLayout>();
 
-            display_weather_icon(layout, m_icons, weatherHours.morningIdx, 0.25, forecastInfo, vl.weatherD, isDay, allocator);
-            display_weather_icon(layout, m_icons, weatherHours.afternoonIdx, 0.25, forecastInfo, vl.weatherD, isDay, allocator);
-            display_weather_icon(layout, m_icons, weatherHours.eveningIdx, 0.25, forecastInfo, vl.weatherD, isDay, allocator);
+            display_hourly_weather_icon(layout, m_icons, weatherHours.morningIdx, 0.25, forecastInfo, vl.weatherD, isDay, allocator);
+            display_hourly_weather_icon(layout, m_icons, weatherHours.afternoonIdx, 0.25, forecastInfo, vl.weatherD, isDay, allocator);
+            display_hourly_weather_icon(layout, m_icons, weatherHours.eveningIdx, 0.25, forecastInfo, vl.weatherD, isDay, allocator);
         }
         {
             auto& img_window = wdg<Window>("J + 1");
@@ -310,9 +331,9 @@ ReadyToGoScreen::ReadyToGoScreen(SDL_Window* pwindow, int width, int height,
             img_window.setEnabled(false);
             auto& layout = img_window.withLayout<GroupLayout>();
 
-            display_weather_icon(layout, m_icons, weatherHours.morningIdx_1, 0.25, forecastInfo, vl.weatherD_1, isDay, allocator);
-            display_weather_icon(layout, m_icons, weatherHours.afternoonIdx_1, 0.25, forecastInfo, vl.weatherD_1, isDay, allocator);
-            display_weather_icon(layout, m_icons, weatherHours.eveningIdx_1, 0.25, forecastInfo, vl.weatherD_1, isDay, allocator);
+            display_hourly_weather_icon(layout, m_icons, weatherHours.morningIdx_1, 0.25, forecastInfo, vl.weatherD_1, isDay, allocator);
+            display_hourly_weather_icon(layout, m_icons, weatherHours.afternoonIdx_1, 0.25, forecastInfo, vl.weatherD_1, isDay, allocator);
+            display_hourly_weather_icon(layout, m_icons, weatherHours.eveningIdx_1, 0.25, forecastInfo, vl.weatherD_1, isDay, allocator);
         }
 
         {
@@ -322,12 +343,12 @@ ReadyToGoScreen::ReadyToGoScreen(SDL_Window* pwindow, int width, int height,
             img_window.setFixedHeight(vl.weatherW.size_y);
             img_window.setEnabled(false);
             auto& layout = img_window.withLayout<GroupLayout>();
+            layout.setFixedWidth(vl.weatherW.size_x);
+            layout.setFixedHeight(vl.weatherW.size_y);
 
-            display_weather_icon(layout, m_icons, weatherHours.jIdx, 0.14, forecastInfo, vl.weatherW, isDay, allocator);
-            display_weather_icon(layout, m_icons, weatherHours.jIdx_1, 0.14, forecastInfo, vl.weatherW, isDay, allocator);
-            display_weather_icon(layout, m_icons, weatherHours.jIdx_2, 0.14, forecastInfo, vl.weatherW, isDay, allocator);
-            display_weather_icon(layout, m_icons, weatherHours.jIdx_3, 0.14, forecastInfo, vl.weatherW, isDay, allocator);
-            display_weather_icon(layout, m_icons, weatherHours.jIdx_4, 0.14, forecastInfo, vl.weatherW, isDay, allocator);
+            display_daily_weather_icon(layout, m_icons, weatherHours.jIdx_2, 0.25, forecastInfo, vl.weatherW, isDay, allocator);
+            display_daily_weather_icon(layout, m_icons, weatherHours.jIdx_3, 0.25, forecastInfo, vl.weatherW, isDay, allocator);
+            display_daily_weather_icon(layout, m_icons, weatherHours.jIdx_4, 0.25, forecastInfo, vl.weatherW, isDay, allocator);
         }
         {
             auto& rainWindow = wdg<Window>("Precipitation");
@@ -364,14 +385,24 @@ ReadyToGoScreen::~ReadyToGoScreen()
 
 }
 
+void ReadyToGoScreen::draw(SDL_Renderer* renderer)
+{
+    std::time_t time = std::time(nullptr);
+
+    bento::DynamicString labelCaption(_allocator);
+    uint32_t labelCount = m_timeLabels.size();
+    for (uint32_t labelIdx = 0; labelIdx < labelCount; ++labelIdx)
+    {
+        auto& lbl = m_timeLabels[labelIdx];
+        checkup::time_to_string(time + lbl.timeOffset, labelCaption);
+        lbl.label->setCaption(labelCaption.c_str());
+    }
+
+    Screen::draw(renderer);
+}
 bool ReadyToGoScreen::keyboardEvent(int key, int scancode, int action, int modifiers)
 {
     if (Screen::keyboardEvent(key, scancode, action, modifiers))
         return true;
     return false;
-}
-
-void ReadyToGoScreen::draw(SDL_Renderer* renderer)
-{
-    Screen::draw(renderer);
 }

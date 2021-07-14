@@ -83,6 +83,18 @@ namespace checkup
         state.pop = graph["pop"].get<float>();
     }
 
+
+    void build_daily_forecast_state_data(const nlohmann::json& graph, TDailyForecastState& state)
+    {
+        auto weatherResult = graph["weather"][0];
+        state.weatherCategory = string_to_category(weatherResult["main"].get<std::string>().c_str());
+        state.weatherDescription = weatherResult["description"].get<std::string>().c_str();
+
+        state.temperature = kelvin_to_celcius(graph["temp"]["day"].get<float>());
+        state.feltTemperature = kelvin_to_celcius(graph["feels_like"]["day"].get<float>());
+        state.pop = graph["pop"].get<float>();
+    }
+
     bool build_forecast_data(const bento::DynamicString& forecastData, TForecastInfo& forecastInfo, bento::ILogger* logger)
     {
         bool success = true;
@@ -93,6 +105,7 @@ namespace checkup
 
             // Ge the timezone offset
             int32_t timezone_offset = jsonResponse["timezone_offset"].get<int32_t>();
+            forecastInfo.timeOffset = timezone_offset;
 
             // Fill the current forecast
             build_current_forecast_state_data(jsonResponse["current"], timezone_offset, forecastInfo.currentForecast);
@@ -103,6 +116,13 @@ namespace checkup
             forecastInfo.hourlyForecast.resize(numHours);
             for (uint32_t hourIdx = 0; hourIdx < numHours; ++hourIdx)
                 build_hourly_forecast_state_data(hourly[hourIdx], forecastInfo.hourlyForecast[hourIdx]);
+
+            // Fill the daily forecast
+            auto daily = jsonResponse["daily"];
+            uint32_t numDays = (uint32_t)daily.size();
+            forecastInfo.dailyForecast.resize(numDays);
+            for (uint32_t dayIdx = 0; dayIdx < numDays; ++dayIdx)
+                build_daily_forecast_state_data(daily[dayIdx], forecastInfo.dailyForecast[dayIdx]);
 
             if (logger != nullptr)
             {

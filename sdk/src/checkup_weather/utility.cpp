@@ -74,7 +74,7 @@ namespace checkup
         }
         else
         {
-            float lerpParam = c_clamp((temperature - 22.0f) / (22.0f - 30.0f), 0.0f, 1.0f);
+            float lerpParam = c_clamp((temperature - 22.0f) / (30.0f - 22.0f), 0.0f, 1.0f);
             outColor.x = lerpParam;
             outColor.y = 1.0f - lerpParam;
             outColor.z = 0.0f;

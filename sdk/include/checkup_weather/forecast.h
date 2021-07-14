@@ -92,6 +92,28 @@ namespace checkup
         bento::IAllocator& _allocator;
     };
 
+    struct TDailyForecastState
+    {
+        ALLOCATOR_BASED;
+        TDailyForecastState(bento::IAllocator& allocator)
+            : _allocator(allocator)
+            , temperature(FLT_MAX)
+            , feltTemperature(FLT_MAX)
+            , weatherCategory(TWeatherCategory::Invalid)
+            , weatherDescription(allocator, "INVALID")
+            , pop(FLT_MAX)
+        {
+        }
+
+        float temperature;
+        float feltTemperature;
+        float pop;
+        TWeatherCategory weatherCategory;
+        bento::DynamicString weatherDescription;
+
+        bento::IAllocator& _allocator;
+    };
+
     struct TForecastInfo
     {
         ALLOCATOR_BASED;
@@ -99,11 +121,14 @@ namespace checkup
         : _allocator(allocator)
         , currentForecast(allocator)
         , hourlyForecast(allocator)
+        , dailyForecast(allocator)
         {
         }
 
+        uint32_t timeOffset;
         TCurrentForecastState currentForecast;
-        bento::Vector< THourlyForecastState> hourlyForecast;
+        bento::Vector<THourlyForecastState> hourlyForecast;
+        bento::Vector<TDailyForecastState> dailyForecast;
         bento::IAllocator& _allocator;
     };
 

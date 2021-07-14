@@ -194,8 +194,8 @@ int main()
         // Render the rect to the screen
         SDL_RenderPresent(renderer);
 
-        // Sleep 300 miliseconds
-        SLEEP_FUNCTION(300);
+        // Sleep 333 miliseconds
+        SDL_Delay(333);
     }
 
     // Terminate the session

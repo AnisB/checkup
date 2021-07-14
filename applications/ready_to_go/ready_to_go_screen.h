@@ -6,10 +6,19 @@
 #include <checkup_weather/weather.h>
 #include <checkup_weather/forecast.h>
 
+struct TimeLabel
+{
+    uint32_t timeOffset;
+    sdlgui::Label* label;
+};
+
 class ReadyToGoScreen : public sdlgui::Screen
 {
 private:
     std::map<std::string, SDL_Texture*> m_icons;
+    std::vector<TimeLabel> m_timeLabels;
+    const bento::Vector<checkup::TForecastInfo>& forecastInfoArray;
+    bento::IAllocator& _allocator;
 
 public:
     ReadyToGoScreen(SDL_Window* pwindow, int width, int height,
@@ -19,6 +28,6 @@ public:
         bento::IAllocator& allocator);
     ~ReadyToGoScreen();
 
-    virtual bool keyboardEvent(int key, int scancode, int action, int modifiers);
     virtual void draw(SDL_Renderer* renderer);
+    virtual bool keyboardEvent(int key, int scancode, int action, int modifiers);
 };
