@@ -189,7 +189,7 @@ void display_hourly_weather_icon(Widget& layout, const std::map<std::string, SDL
     }
     else
     {
-        auto imageIt = icons.find("icons/Empty.png");
+        auto imageIt = icons.find("images/Empty.png");
         auto imageView = layout.add<ImageView>(imageIt->second);
         imageView->setFixedWidth(rect.size_y * scale);
         imageView->setFixedHeight(rect.size_y * scale);
@@ -225,7 +225,7 @@ ReadyToGoScreen::ReadyToGoScreen(SDL_Window* pwindow, int width, int height,
     bento::DynamicString labelBuild(allocator);
 
     // Load all images
-    ListImages images = loadImageDirectory(SDL_GetRenderer(pwindow), "icons");
+    ListImages images = loadImageDirectory(SDL_GetRenderer(pwindow), "images");
     for (auto& icon : images) 
         m_icons[icon.path] = icon.tex;
 
