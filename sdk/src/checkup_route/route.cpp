@@ -41,9 +41,9 @@ namespace checkup
             auto sectionsJson = routesJson["sections"][0];
             auto summaryJson = sectionsJson["summary"];
             routeInfo.duration = summaryJson["duration"];
-            routeInfo.baseDuration = summaryJson["baseDuration"];
-            routeInfo.length = summaryJson["length"] / 1000.0f;
-            routeInfo.typicalDuration = summaryJson["typicalDuration"];
+            routeInfo.baseDuration = summaryJson["baseDuration"].get<uint32_t>();
+            routeInfo.length = summaryJson["length"].get<uint32_t>() / 1000.0f;
+            routeInfo.typicalDuration = summaryJson["typicalDuration"].get<uint32_t>();
 
             if (logger != nullptr)
             {
