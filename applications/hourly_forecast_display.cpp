@@ -59,7 +59,7 @@ int main(int, char**)
 
         // Build and execute the forecast request
         build_forecast_request(weatherInfo.latitude, weatherInfo.longitude, owmToken.c_str(), request);
-        session.execute(request);
+        session.execute(request, logger);
         checkup::TForecastInfo forecastInfo(systemAllocator);
         build_forecast_data(request.result, forecastInfo, logger);
     }

@@ -52,7 +52,7 @@ int main(int, char**)
 
         const std::string& location = viewportJson["name"].get<std::string>();
         build_weather_request(location.c_str(), owmToken.c_str(), request);
-        session.execute(request);
+        session.execute(request, logger);
 
         // Parse the weather info
         checkup::TWeatherInfo weatherInfo(systemAllocator);

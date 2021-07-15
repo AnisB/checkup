@@ -371,29 +371,61 @@ void ReadyToGoScreen::weather_viewport(int viewportIdx)
         display_daily_weather_icon(layout, m_icons, weatherHours.jIdx_4, 0.25, forecastInfo, vl.weatherW, isDay, _allocator);
     }
     {
-        auto& rainWindow = wdg<Window>("Precipitation");
+        auto& precipWindow = wdg<Window>("Precipitation Probability");
+        precipWindow.setPosition(Vector2i{ vl.preci.start_x, vl.preci.start_y });
+        precipWindow.setFixedWidth(vl.preci.size_x);
+        precipWindow.setFixedHeight(vl.preci.size_y);
+        precipWindow.setEnabled(false);
+        auto& precipWindowLayout = precipWindow.withLayout<GroupLayout>();
+
+        Graph* precipGraph = precipWindowLayout.add<Graph>("Probablity");
+        precipGraph->setFixedHeight((int)(weatherViewport.height * m_height * 0.3f));
+        precipGraph->setHeader("100%");
+        precipGraph->setFooter("0%");
+        precipGraph->setForegroundColor(debugColor);
+        {
+            std::vector<float>& func = precipGraph->values();
+
+            uint32_t numHours = forecastInfo.hourlyForecast.size();
+            numHours = numHours < 24 ? numHours : 24;
+            func.resize(numHours);
+            for (uint32_t i = 0; i < numHours; ++i)
+            {
+                func[i] = forecastInfo.hourlyForecast[i].pop, 0.02f;
+                if (func[i] < 0.02f)
+                    func[i] = 0.02f;
+            }
+        }
+
+        auto& rainWindow = wdg<Window>("Rain Amount");
         rainWindow.setPosition(Vector2i{ vl.preci.start_x, vl.preci.start_y });
         rainWindow.setFixedWidth(vl.preci.size_x);
         rainWindow.setFixedHeight(vl.preci.size_y);
         rainWindow.setEnabled(false);
         auto& rainWindowLayout = rainWindow.withLayout<GroupLayout>();
 
-        Graph* graph = rainWindowLayout.add<Graph>("Rain Curves");
-        graph->setFixedHeight((int)(weatherViewport.height * m_height * 0.3f));
-        graph->setHeader("100%");
-        graph->setFooter("0%");
-        graph->setForegroundColor(debugColor);
-        std::vector<float>& func = graph->values();
-
-        uint32_t numHours = forecastInfo.hourlyForecast.size();
-        numHours = numHours < 24 ? numHours : 24;
-        func.resize(numHours);
-        for (uint32_t i = 0; i < numHours; ++i)
+        Graph* rainGraph = rainWindow.add<Graph>("Height");
+        rainGraph->setFixedHeight((int)(weatherViewport.height * m_height * 0.3f));
+        rainGraph->setHeader("10mm");
+        rainGraph->setFooter("0mm");
+        rainGraph->setForegroundColor(debugColor);
         {
-            func[i] = forecastInfo.hourlyForecast[i].pop, 0.02f;
-            if (func[i] < 0.02f)
-                func[i] = 0.02f;
+            std::vector<float>& func = rainGraph->values();
+
+            uint32_t numHours = forecastInfo.hourlyForecast.size();
+            numHours = numHours < 24 ? numHours : 24;
+            func.resize(numHours);
+            for (uint32_t i = 0; i < numHours; ++i)
+            {
+                func[i] = forecastInfo.hourlyForecast[i].rain1h_o, 0.0f;
+            }
         }
+
+
+        ForecastWindows forecastWindows;
+        forecastWindows.pop = &precipWindow;
+        forecastWindows.rain = &rainWindow;
+        m_forecastWindows.push_back(forecastWindows);
     }
 }
 
@@ -440,12 +472,36 @@ void ReadyToGoScreen::draw(SDL_Renderer* renderer)
     std::time_t time = std::time(nullptr);
 
     bento::DynamicString labelCaption(_allocator);
-    uint32_t labelCount = m_timeLabels.size();
-    for (uint32_t labelIdx = 0; labelIdx < labelCount; ++labelIdx)
+    uint32_t weatherViewports = m_timeLabels.size();
+    for (uint32_t labelIdx = 0; labelIdx < weatherViewports; ++labelIdx)
     {
         auto& lbl = m_timeLabels[labelIdx];
         checkup::time_to_string(time + lbl.timeOffset, labelCaption);
         lbl.label->setCaption(labelCaption.c_str());
+    }
+
+    // Initial update time
+    uint32_t sdlTicks = SDL_GetTicks();
+
+    // We switch which graphs are displayed every 10 seconds
+    int status = sdlTicks / (1000 * 15) % 2;
+    for (uint32_t graphIdx = 0; graphIdx < weatherViewports; ++graphIdx)
+    {
+        auto& forecastWindows = m_forecastWindows[graphIdx];
+        if (status == 1)
+        {
+            forecastWindows.pop->setVisible(true);
+            forecastWindows.pop->setEnabled(true);
+            forecastWindows.rain->setVisible(false);
+            forecastWindows.rain->setEnabled(false);
+        }
+        else
+        {
+            forecastWindows.pop->setVisible(false);
+            forecastWindows.pop->setEnabled(false);
+            forecastWindows.rain->setVisible(true);
+            forecastWindows.rain->setEnabled(true);
+        }
     }
 
     Screen::draw(renderer);

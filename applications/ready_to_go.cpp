@@ -113,8 +113,6 @@ int main()
     // Create an allocator for our application
     bento::SystemAllocator systemAllocator;
 
-
-
     // Grab the logger
     bento::ILogger* logger = bento::default_logger();
     

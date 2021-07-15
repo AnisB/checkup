@@ -36,11 +36,18 @@ struct TimeLabel
     sdlgui::Label* label;
 };
 
+struct ForecastWindows
+{
+    sdlgui::Window* pop;
+    sdlgui::Window* rain;
+};
+
 class ReadyToGoScreen : public sdlgui::Screen
 {
 private:
     std::map<std::string, SDL_Texture*> m_icons;
     std::vector<TimeLabel> m_timeLabels;
+    std::vector<ForecastWindows> m_forecastWindows;
     const TDisplayData& m_displayData;
     int m_width;
     int m_height;

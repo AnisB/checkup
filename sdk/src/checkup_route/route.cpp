@@ -22,6 +22,7 @@ namespace checkup
         request.content += originCoords;
         request.content += "&destination=";
         request.content += destinationCoords;
+        request.content += "&units=metric";
         request.content += "&return=summary,typicalDuration,polyline";
         request.content += "&apiKey=";
         request.content += token;

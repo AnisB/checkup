@@ -43,12 +43,20 @@ namespace checkup
             if (rainNode.find("1h") != rainNode.end())
                 state.rain1h_o = rainNode["1h"].get<float>();
         }
+        else
+        {
+            state.rain1h_o = 0.0;
+        }
 
         if (graph.find("snow") != graph.end())
         {
             auto snowNode = graph["snow"];
             if (snowNode.find("1h") != snowNode.end())
                 state.snow1h_o = snowNode["1h"].get<float>();
+        }
+        else
+        {
+            state.snow1h_o = 0.0;
         }
     }
 
@@ -72,6 +80,10 @@ namespace checkup
             if (rainNode.find("1h") != rainNode.end())
                 state.rain1h_o = rainNode["1h"].get<float>();
         }
+        else
+        {
+            state.rain1h_o = 0.0;
+        }
 
         if (graph.find("snow") != graph.end())
         {
@@ -79,7 +91,11 @@ namespace checkup
             if (snowNode.find("1h") != snowNode.end())
                 state.snow1h_o = snowNode["1h"].get<float>();
         }
-
+        else
+        {
+            state.snow1h_o = 0.0;
+        }
+        
         state.pop = graph["pop"].get<float>();
     }
 
