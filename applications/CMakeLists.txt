@@ -12,6 +12,9 @@ target_link_libraries("hourly_forecast_display" "checkup_sdk" "bento_sdk" "${CUR
 bento_exe("clear_to_tint" "applications" "clear_to_tint.cpp" "${CHECKUP_SDK_INCLUDE};${CHECKUP_3RD_INCLUDE};${SDL2_INCLUDE_DIRS}")
 target_link_libraries("clear_to_tint" "checkup_sdk" "bento_sdk" "${CURL_LIBRARIES}" "${SDL2_LIBRARIES}")
 
+bento_exe("ratp_display" "applications" "ratp_display.cpp" "${CHECKUP_SDK_INCLUDE};${CHECKUP_3RD_INCLUDE}")
+target_link_libraries("ratp_display" "checkup_sdk" "bento_sdk" "${CURL_LIBRARIES}")
+
 bento_exe("ready_to_go" "applications" "ready_to_go.cpp;ready_to_go/ready_to_go_screen.cpp;ready_to_go/ready_to_go_screen.h" "${CHECKUP_SDK_INCLUDE};${CHECKUP_3RD_INCLUDE};${SDL2_INCLUDE_DIRS};${SDL_GUI_INCLUDE}")
 
 if (PLATFORM_WINDOWS)

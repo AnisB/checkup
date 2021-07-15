@@ -241,6 +241,13 @@ ReadyToGoScreen::ReadyToGoScreen(SDL_Window* pwindow, int width, int height,
         route_viewport(viewportIdx);
     }
 
+    // Loop through the viewports
+    uint32_t numRatpViewports = displayData.ratpViewportArray.size();
+    for (uint32_t viewportIdx = 0; viewportIdx < numRatpViewports; ++viewportIdx)
+    {
+        ratp_viewport(viewportIdx);
+    }
+
     performLayout(mSDL_Renderer);
 }
 
@@ -463,9 +470,56 @@ void ReadyToGoScreen::route_viewport(int viewportIdx)
         labelBuild += str.c_str();
 
         auto& generalLayout = generalWindow.withLayout<GroupLayout>();
-        generalLayout.label(labelBuild.c_str(), "Raleway-Regular", 24);
+        generalLayout.label(labelBuild.c_str(), "Raleway-Regular", 13);
     }
 }
+
+std::vector<std::string> make_string_multiline(const std::string& inputString, int numCharsPerLine)
+{
+    std::vector<std::string> outputString;
+    int inputLength = inputString.length();
+    int numLines = (inputLength + (numCharsPerLine - 1)) / numCharsPerLine;
+    for (int lineIdx = 0; lineIdx < numLines; ++lineIdx)
+    {
+        outputString.push_back(inputString.substr(lineIdx * numCharsPerLine, numCharsPerLine));
+    }
+    return outputString;
+}
+
+
+void ReadyToGoScreen::ratp_viewport(int viewportIdx)
+{
+    bento::DynamicString labelBuild(_allocator);
+
+    // Grab the current weather data
+    const checkup::TRATPViewport& ratpViewport = m_displayData.ratpViewportArray[viewportIdx];
+    const checkup::TRATPInfo& ratpInfo = m_displayData.ratpInfo;
+    {
+        // Create the window
+        auto& generalWindow = wdg<Window>(ratpViewport.name.c_str());
+
+        int displayPadding = 3;
+        int start_x = (int)(ratpViewport.startX * m_width + displayPadding);
+        int start_y = (int)(ratpViewport.startY * m_height + displayPadding);
+        int size_x = (int)(ratpViewport.width * m_width - displayPadding * 2);
+        int size_y = (int)(ratpViewport.height * m_height - displayPadding * 2);
+
+        // Set it's size and position
+        generalWindow.setPosition(Vector2i{ start_x, start_y });
+        generalWindow.setFixedWidth(size_x);
+        generalWindow.setFixedHeight(size_y);
+        generalWindow.setEnabled(false);
+
+        const auto& lineName = ratpViewport.line;
+        auto& generalLayout = generalWindow.withLayout<GroupLayout>();
+        auto it = ratpInfo.lines_message.find(lineName.c_str());
+        const auto& multLineString = make_string_multiline(it->second, 51);
+
+        for each (auto line in multLineString)
+            generalLayout.label(line.c_str(), "Raleway-Regular", 12);
+    }
+}
+
 
 void ReadyToGoScreen::draw(SDL_Renderer* renderer)
 {

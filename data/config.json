@@ -102,6 +102,34 @@
                 "g" : 0.8,
                 "b" : 0.5
             }
+        },
+        {
+            "type": "RATP",
+            "name": "Metro 6",
+            "line": "6",
+            "start_x" : 0.5,
+            "start_y" : 0.75,
+            "size_x" : 0.25,
+            "size_y" : 0.25,
+            "debug_color" : {
+                "r" : 0.3,
+                "g" : 0.8,
+                "b" : 0.5
+            }
+        },
+        {
+            "type": "RATP",
+            "name": "Metro 4",
+            "line": "4",
+            "start_x" : 0.75,
+            "start_y" : 0.5,
+            "size_x" : 0.25,
+            "size_y" : 0.25,
+            "debug_color" : {
+                "r" : 0.3,
+                "g" : 0.8,
+                "b" : 0.5
+            }
         }
     ],
     "tokens": {

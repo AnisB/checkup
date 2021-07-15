@@ -6,6 +6,7 @@
 #include <checkup_weather/weather.h>
 #include <checkup_weather/forecast.h>
 #include <checkup_route/route.h>
+#include <checkup_transport/ratp.h>
 
 struct TDisplayData
 {
@@ -14,8 +15,13 @@ struct TDisplayData
         : weatherViewportArray(allocator)
         , weatherInfoArray(allocator)
         , forecastInfoArray(allocator)
+
         , routeViewportArray(allocator)
         , routeInfoArray(allocator)
+
+        , ratpViewportArray(allocator)
+        , ratpInfo()
+
         , owmToken(allocator)
         , hereToken(allocator)
     {
@@ -23,11 +29,16 @@ struct TDisplayData
     }
     bento::DynamicString owmToken;
     bento::DynamicString hereToken;
+
     bento::Vector<checkup::TWeatherViewport> weatherViewportArray;
     bento::Vector<checkup::TWeatherInfo> weatherInfoArray;
     bento::Vector<checkup::TForecastInfo> forecastInfoArray;
+
     bento::Vector<checkup::TRouteViewport> routeViewportArray;
     bento::Vector<checkup::TRouteInfo> routeInfoArray;
+
+    bento::Vector<checkup::TRATPViewport> ratpViewportArray;
+    checkup::TRATPInfo ratpInfo;
 };
 
 struct TimeLabel
@@ -62,6 +73,7 @@ public:
 
     void weather_viewport(int viewportIdx);
     void route_viewport(int viewportIdx);
+    void ratp_viewport(int viewportIdx);
     virtual void draw(SDL_Renderer* renderer);
     virtual bool keyboardEvent(int key, int scancode, int action, int modifiers);
 };

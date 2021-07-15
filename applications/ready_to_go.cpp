@@ -85,7 +85,7 @@ void run_rest_requests(TDisplayData& displayData, bento::IAllocator& allocator)
         }
     }
 
-    // Number of weather viewports to handle
+    // Number of route viewports to handle
     uint32_t numRouteViewports = displayData.routeViewportArray.size();
     displayData.routeInfoArray.resize(numRouteViewports);
 
@@ -102,6 +102,18 @@ void run_rest_requests(TDisplayData& displayData, bento::IAllocator& allocator)
         // Parse the weather info
         auto& currentRoute = displayData.routeInfoArray[routeIdx];
         build_route_data(request.result, currentRoute);
+    }
+
+    // Number of ratp viewports to handle
+    uint32_t numRatpViewports = displayData.ratpViewportArray.size();
+    // Loop throught the viewpots
+    if (numRatpViewports != 0)
+    {
+        build_ratp_request(request);
+        session.execute(request);
+
+        // Parse the weather info
+        build_ratp_data(request.result, displayData.ratpInfo);
     }
 
     // Terminate the session
@@ -170,6 +182,21 @@ int main()
             routeViewport.debugColor.x = viewportJson["debug_color"]["r"].get<float>();
             routeViewport.debugColor.y = viewportJson["debug_color"]["g"].get<float>();
             routeViewport.debugColor.z = viewportJson["debug_color"]["b"].get<float>();
+        }
+
+        if (viewportJson["type"].get<std::string>() == "RATP")
+        {
+            // Create new viewport
+            checkup::TRATPViewport& ratpViewport = displayData.ratpViewportArray.extend();
+            ratpViewport.name = viewportJson["name"].get<std::string>().c_str();
+            ratpViewport.line = viewportJson["line"].get<std::string>().c_str();
+            ratpViewport.startX = viewportJson["start_x"].get<float>();
+            ratpViewport.startY = viewportJson["start_y"].get<float>();
+            ratpViewport.width = viewportJson["size_x"].get<float>();
+            ratpViewport.height = viewportJson["size_y"].get<float>();
+            ratpViewport.debugColor.x = viewportJson["debug_color"]["r"].get<float>();
+            ratpViewport.debugColor.y = viewportJson["debug_color"]["g"].get<float>();
+            ratpViewport.debugColor.z = viewportJson["debug_color"]["b"].get<float>();
         }
     }
 
