@@ -41,13 +41,26 @@ namespace checkup
         bento::IAllocator& _allocator;
     };
 
+    enum class TLineState
+    {
+        Normal,
+        NormalTravaux,
+        Other
+    };
+
+    struct TLineInfo
+    {
+        TLineState state;
+        std::string message;
+    };
+
     struct TRATPInfo
     {
-        std::map<std::string, std::string> lines_message;
+        std::map<std::string, TLineInfo> linesInfo;
     };
 
 
-    void build_lines_from_string(const char* data, bento::Vector<bento::DynamicString>& outputArray);
+    bento::Vector3 state_to_color(TLineState state);
     void build_ratp_request(TRequest& request);
     bool build_ratp_data(const bento::DynamicString& ratpData, TRATPInfo& ratpInfo, bento::ILogger* logger = nullptr);
 }

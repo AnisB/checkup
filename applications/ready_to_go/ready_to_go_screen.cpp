@@ -474,14 +474,25 @@ void ReadyToGoScreen::route_viewport(int viewportIdx)
     }
 }
 
-std::vector<std::string> make_string_multiline(const std::string& inputString, int numCharsPerLine)
+int min_value(int a, int b)
 {
+    return a < b ? a : b;
+}
+
+std::vector<std::string> make_string_multiline(const std::string& inputString, int targetCharPerLine)
+{
+    // Output structure
     std::vector<std::string> outputString;
     int inputLength = inputString.length();
-    int numLines = (inputLength + (numCharsPerLine - 1)) / numCharsPerLine;
-    for (int lineIdx = 0; lineIdx < numLines; ++lineIdx)
+    int currentChar = 0;
+    while (currentChar < (inputLength- 1))
     {
-        outputString.push_back(inputString.substr(lineIdx * numCharsPerLine, numCharsPerLine));
+        int lineEndChar = min_value(currentChar + targetCharPerLine, inputLength - 1);
+        while ((inputString[lineEndChar - 1] != ' ') && (lineEndChar != (inputLength - 1)))
+            lineEndChar--;
+        const std::string& lineString = inputString.substr(currentChar, lineEndChar - currentChar);
+        outputString.push_back(lineString);
+        currentChar = lineEndChar;
     }
     return outputString;
 }
@@ -512,11 +523,11 @@ void ReadyToGoScreen::ratp_viewport(int viewportIdx)
 
         const auto& lineName = ratpViewport.line;
         auto& generalLayout = generalWindow.withLayout<GroupLayout>();
-        auto it = ratpInfo.lines_message.find(lineName.c_str());
-        const auto& multLineString = make_string_multiline(it->second, 51);
-
+        auto it = ratpInfo.linesInfo.find(lineName.c_str());
+        const auto& multLineString = make_string_multiline(it->second.message, 55);
+        bento::Vector3 color = checkup::state_to_color(it->second.state);
         for each (auto line in multLineString)
-            generalLayout.label(line.c_str(), "Raleway-Regular", 12);
+            generalLayout.label(line.c_str(), "Raleway-Regular", 11).setColor(sdlgui::Color(color.x, color.y, color.z, 1.0));
     }
 }
 
