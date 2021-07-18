@@ -5,8 +5,7 @@ project(checkup)
 set(BENTO_SDK_ROOT ${PROJECT_SOURCE_DIR}/bento)
 set(CHECKUP_SDK_ROOT ${PROJECT_SOURCE_DIR}/sdk)
 set(CHECKUP_DATA_ROOT ${PROJECT_SOURCE_DIR}/data)
-set(CHECKUP_CAPI_ROOT ${PROJECT_SOURCE_DIR}/c_api)
-set(CHECKUP_CAPI_APPLICATIONS ${PROJECT_SOURCE_DIR}/applications)
+set(CHECKUP_APPLICATIONS_ROOT ${PROJECT_SOURCE_DIR}/applications)
 set(CHECKUP_3RD_LIB ${PROJECT_SOURCE_DIR}/3rd/lib)
 set(CHECKUP_3RD_BIN ${PROJECT_SOURCE_DIR}/3rd/bin)
 set(CHECKUP_3RD_INCLUDE ${PROJECT_SOURCE_DIR}/3rd/include)
@@ -42,8 +41,7 @@ add_subdirectory(${SDL_GUI_ROOT})
 # Generate the CHECKUP SDK
 add_subdirectory(${CHECKUP_SDK_ROOT}/src)
 
-# Generate the dynamic library
-add_subdirectory(${CHECKUP_CAPI_ROOT}/src)
-
+if(APPLICATIONS)
 # Generate the applications
-add_subdirectory(${CHECKUP_CAPI_APPLICATIONS})
+add_subdirectory(${CHECKUP_APPLICATIONS_ROOT})
+endif()
