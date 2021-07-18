@@ -52,9 +52,9 @@ void build_weather_viewport_layout(const checkup::TWeatherViewport& viewport, in
 {
     int displayPadding = 3;
     viewportLayout.general.start_x = (int)(viewport.startX * width + displayPadding);
-    viewportLayout.general.start_y = (int)(viewport.startY * height);
+    viewportLayout.general.start_y = (int)(viewport.startY * height + displayPadding);
     viewportLayout.general.size_x = (int)(viewport.width * width - displayPadding*2);
-    viewportLayout.general.size_y = (int)(viewport.height * height * 0.25);
+    viewportLayout.general.size_y = (int)(viewport.height * height * 0.25 - displayPadding * 2);
 
     viewportLayout.temp.start_x = (int)(viewport.startX * width + displayPadding);
     viewportLayout.temp.start_y = (int)((viewport.startY + 0.25 * viewport.height) * height + displayPadding);

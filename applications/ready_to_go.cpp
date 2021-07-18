@@ -224,7 +224,7 @@ int main()
         bento::default_logger()->log(bento::LogLevel::error, "SDL Window", SDL_GetError());
 
     // Set the window full screen
-    SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+    SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
 
     // Create a gl context
     auto context = SDL_GL_CreateContext(window);
