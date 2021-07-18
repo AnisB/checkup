@@ -37,10 +37,10 @@ struct Graph::AsyncTexture
       NVGcontext *ctx = nvgCreateRT(NVG_DEBUG, ww, hh, 0);
 
       float pxRatio = 1.0f;
-      nvgBeginFrame(ctx, ww, hh, pxRatio);
+      nvgBeginFrame(ctx, (float)ww, (float)hh, pxRatio);
 
       nvgBeginPath(ctx);
-      nvgRect(ctx, 0, 0, ww, hh);
+      nvgRect(ctx, 0, 0, (float)ww, (float)hh);
       nvgFillColor(ctx, graph->backgroundColor().toNvgColor());
       nvgFill(ctx);
 
@@ -48,7 +48,7 @@ struct Graph::AsyncTexture
         return;
 
       nvgBeginPath(ctx);
-      nvgMoveTo(ctx, 0, 0 + hh);
+      nvgMoveTo(ctx, 0, 0 + (float)hh);
       auto& values = graph->values();
       for (size_t i = 0; i < (size_t)values.size(); i++) 
       {
@@ -58,7 +58,7 @@ struct Graph::AsyncTexture
         nvgLineTo(ctx, vx, vy);
       }
 
-      nvgLineTo(ctx, 0 + ww, 0 + hh);
+      nvgLineTo(ctx, 0 + (float)ww, 0 + (float)hh);
       nvgStrokeColor(ctx, Color(100, 255).toNvgColor());
       nvgStroke(ctx);
       nvgFillColor(ctx, graph->foregroundColor().toNvgColor());

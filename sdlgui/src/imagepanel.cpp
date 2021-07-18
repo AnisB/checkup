@@ -30,7 +30,7 @@ Vector2i ImagePanel::gridSize() const
 
 int ImagePanel::indexForPosition(const Vector2i &p) const
 {
-  Vector2f pp = (p.tofloat() - Vector2f(mMargin, mMargin)) / (float)(mThumbSize + mSpacing);
+  Vector2f pp = (p.tofloat() - Vector2f((float)mMargin, (float)mMargin)) / (float)(mThumbSize + mSpacing);
     float iconRegion = mThumbSize / (float)(mThumbSize + mSpacing);
     bool overImage = pp.x - std::floor(pp.x) < iconRegion &&
                     pp.y - std::floor(pp.y) < iconRegion;
@@ -85,14 +85,14 @@ void ImagePanel::draw(SDL_Renderer* renderer)
         float iw, ih, ix, iy;
         if (imgw < imgh) 
         {
-            iw = mThumbSize;
+            iw = (float)mThumbSize;
             ih = iw * (float)imgh / (float)imgw;
             ix = 0;
             iy = -(ih - mThumbSize) * 0.5f;
         } 
         else 
         {
-            ih = mThumbSize;
+            ih = (float)mThumbSize;
             iw = ih * (float)imgw / (float)imgh;
             ix = -(iw - mThumbSize) * 0.5f;
             iy = 0;
@@ -111,7 +111,7 @@ void ImagePanel::draw(SDL_Renderer* renderer)
           SDL_RenderFillRect(renderer, &shadowPaintRect);
         }
 
-        SDL_Rect imgPaintRect{ p.x + ix, p.y + iy, iw, ih };
+        SDL_Rect imgPaintRect{ (int)(p.x + ix), (int)(p.y + iy), (int)iw, (int)ih };
         SDL_Rect imgSrcRect{ 0, 0, imgw, imgh };
         PntRect imgrect = clip_rects(srect2pntrect(imgPaintRect), clip);
         imgPaintRect.w = imgrect.x2 - imgrect.x1;
@@ -119,12 +119,12 @@ void ImagePanel::draw(SDL_Renderer* renderer)
         if (imgPaintRect.y < clip.y1)
         {
           imgPaintRect.y = clip.y1;
-          imgSrcRect.h = (imgPaintRect.h / (float)ih) * imgh;
-          imgSrcRect.y = (1 - (imgPaintRect.h / (float)ih)) * imgh;
+          imgSrcRect.h = (int)((imgPaintRect.h / (float)ih) * imgh);
+          imgSrcRect.y = (int)((1 - (imgPaintRect.h / (float)ih)) * imgh);
         }
         else if(imgPaintRect.h < ih)
         {
-          imgSrcRect.h = (imgPaintRect.h / (float)ih) * imgh;
+          imgSrcRect.h = (int)((imgPaintRect.h / (float)ih) * imgh);
         }
 
         SDL_RenderCopy(renderer, mImages[i].tex, &imgSrcRect, &imgPaintRect);

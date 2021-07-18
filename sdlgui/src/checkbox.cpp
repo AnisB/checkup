@@ -48,7 +48,7 @@ struct CheckBox::AsyncTexture
       NVGcontext *ctx = nvgCreateRT(NVG_DEBUG, ww + 2, hh + 2, 0);
 
       float pxRatio = 1.0f;
-      nvgBeginFrame(ctx, ww + 2, hh + 2, pxRatio);
+      nvgBeginFrame(ctx, (float)(ww + 2), (float)(hh + 2), pxRatio);
 
       NVGpaint bg = nvgBoxGradient(ctx, 1.5f, 1.5f, hh - 2.0f, hh - 2.0f, 3, 3, c.toNvgColor(), b.toNvgColor());
 
@@ -132,7 +132,7 @@ Vector2i CheckBox::preferredSize(SDL_Renderer *ctx) const
 
     int w, h;
     const_cast<CheckBox*>(this)->mTheme->getTextBounds("sans", fontSize(), mCaption.c_str(), &w, &h);
-    return Vector2i(w + 1.7f * fontSize(),  fontSize() * 1.3f);
+    return Vector2i((int)(w + 1.7f * fontSize()), (int)(fontSize() * 1.3f));
 }
 
 void CheckBox::drawBody(SDL_Renderer* renderer)
@@ -171,8 +171,8 @@ void CheckBox::draw(SDL_Renderer *renderer)
   if (_captionTex.dirty)
   {
     Color tColor = (mEnabled ? mTheme->mTextColor : mTheme->mDisabledTextColor);
-    mTheme->getTexAndRectUtf8(renderer, _captionTex, 0, 0, mCaption.c_str(), "sans", fontSize(), tColor);
-    mTheme->getTexAndRectUtf8(renderer, _pointTex, 0, 0, utf8(ENTYPO_ICON_CHECK).data(), "icons", 1.8 * mSize.y, tColor);
+    mTheme->getTexAndRectUtf8(renderer, _captionTex, 0, 0, mCaption.c_str(), "sans", (size_t)fontSize(), tColor);
+    mTheme->getTexAndRectUtf8(renderer, _pointTex, 0, 0, utf8(ENTYPO_ICON_CHECK).data(), "icons", (size_t)(1.8f * mSize.y), tColor);
   }
  
   auto ap = absolutePosition();

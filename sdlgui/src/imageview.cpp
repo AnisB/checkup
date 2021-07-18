@@ -157,7 +157,7 @@ bool ImageView::scrollEvent(const Vector2i& p, const Vector2f& rel)
   float v = rel.y;
   if (std::abs(v) < 1)
     v = std::copysign(1.f, v);
-  zoom(v, (p -position()).tofloat());
+  zoom((int)v, (p -position()).tofloat());
     return true;
 }
 
@@ -235,7 +235,7 @@ bool ImageView::keyboardCharacterEvent(unsigned int codepoint) {
     case '1': case '2': case '3': case '4': case '5':
     case '6': case '7': case '8': case '9':
         if (!mFixedScale) {
-            setScaleCentered(1 << (codepoint - '1'));
+            setScaleCentered((float)(1 << (codepoint - '1')));
             return true;
         }
         break;
@@ -289,18 +289,18 @@ void ImageView::draw(SDL_Renderer* renderer)
       int ih = r.y2 - r.y1;
       if (positionAfterOffset.x <= ap.x)
       {
-        ix = ap.x - positionAfterOffset.x;
+        ix = (int)(ap.x - positionAfterOffset.x);
         iw = mImageSize.x- ix;
-        positionAfterOffset.x = absolutePosition().x;
+        positionAfterOffset.x = (float)absolutePosition().x;
       }
       if (positionAfterOffset.y <= ap.y)
       {
-        iy = ap.y - positionAfterOffset.y;
+        iy = (int)(ap.y - positionAfterOffset.y);
         ih = mImageSize.y - iy;
-        positionAfterOffset.y = absolutePosition().y;
+        positionAfterOffset.y = (float)absolutePosition().y;
       }
       SDL_Rect imgrect{ix, iy, iw, ih};
-      SDL_Rect rect{ positionAfterOffset.x, positionAfterOffset.y, imgrect.w, imgrect.h};
+      SDL_Rect rect{ (int)positionAfterOffset.x, (int)positionAfterOffset.y, imgrect.w, imgrect.h};
 
       SDL_RenderCopy(renderer, mTexture, &imgrect, &rect);
     }
@@ -368,7 +368,7 @@ void ImageView::drawHelpers(SDL_Renderer* renderer) const
   Vector2f sizeOffsetDifference = sizeF() - mOffset;
   Vector2f scissorSize = sizeOffsetDifference.cmin(sizeF());
 
-  SDL_Rect r{ scissorPosition.x, scissorPosition.y, scissorSize.x, scissorSize.y };
+  SDL_Rect r{ (int)scissorPosition.x, (int)scissorPosition.y, (int)scissorSize.x, (int)scissorSize.y };
   if (gridVisible())
     drawPixelGrid(renderer, upperLeftCorner, lowerRightCorner, mScale);
   if (pixelInfoVisible())
@@ -384,16 +384,16 @@ void ImageView::drawPixelGrid(SDL_Renderer* renderer, const Vector2f& upperLeftC
     float currentX = std::floor(upperLeftCorner.x);
     while (currentX <= lowerRightCorner.x) 
     {
-      SDL_RenderDrawLine(renderer, std::floor(currentX), std::floor(upperLeftCorner.y),
-                          std::floor(currentX), std::floor(lowerRightCorner.y));
+      SDL_RenderDrawLine(renderer, (int)std::floor(currentX), (int)std::floor(upperLeftCorner.y),
+		  (int)std::floor(currentX), (int)std::floor(lowerRightCorner.y));
       currentX += stride;
     }
     // Draw the horizontal lines for the grid.
     float currentY = std::floor(upperLeftCorner.y);
     while (currentY <= lowerRightCorner.y) 
     {
-      SDL_RenderDrawLine(renderer, std::floor(upperLeftCorner.x), std::floor(currentY),
-                                    std::floor(lowerRightCorner.x), std::floor(currentY));
+      SDL_RenderDrawLine(renderer, (int)std::floor(upperLeftCorner.x), (int)std::floor(currentY),
+		  (int)std::floor(lowerRightCorner.x), (int)std::floor(currentY));
       currentY += stride;
     }
 }

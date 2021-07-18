@@ -55,7 +55,7 @@ int main(int, char**)
         session.execute(request, logger);
 
         // Parse the weather info
-        checkup::TRATPInfo ratpInfo(systemAllocator);
+        checkup::TRATPInfo ratpInfo;
         build_ratp_data(request.result, ratpInfo, logger);
     }
 

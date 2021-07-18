@@ -88,12 +88,12 @@ void Popup::rendereBodyTexture(NVGcontext*& ctx, int& realw, int& realh, int dx)
   ctx = nvgCreateRT(NVG_DEBUG, realw, realh, 0);
 
   float pxRatio = 1.0f;
-  nvgBeginFrame(ctx, realw, realh, pxRatio);
+  nvgBeginFrame(ctx, (float)realw, (float)realh, pxRatio);
 
   int cr = mTheme->mWindowCornerRadius;
 
   /* Draw a drop shadow */
-  NVGpaint shadowPaint = nvgBoxGradient(ctx, offset.x, offset.y, ww, hh, cr * 2, ds * 2,
+  NVGpaint shadowPaint = nvgBoxGradient(ctx, (float)offset.x, (float)offset.y, (float)ww, (float)hh, (float)(cr * 2), (float)(ds * 2),
     mTheme->mDropShadow.toNvgColor(),
     mTheme->mTransparent.toNvgColor());
 

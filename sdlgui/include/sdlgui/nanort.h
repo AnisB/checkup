@@ -365,7 +365,7 @@ struct Intersection {
   float t = 0.f;
   float u = 0.f;
   float v = 0.f;
-  unsigned int faceID = 0.f;
+  unsigned int faceID = 0;
   Intersection() {}
   Intersection(float _t, float _u, float _v, unsigned int i) : t(_t), u(_u), v(_v), faceID(i) {}
 } ;

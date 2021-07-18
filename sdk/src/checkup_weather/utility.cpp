@@ -82,7 +82,7 @@ namespace checkup
         return outColor;
     }
 
-    void time_to_string(uint32_t time, bento::DynamicString& outputString)
+    void time_to_string(int64_t time, bento::DynamicString& outputString)
     {
         time_t temp = time;
         tm* t = std::gmtime(&temp);

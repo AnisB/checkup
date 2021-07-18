@@ -86,15 +86,15 @@ Button::Button(Widget *parent, const std::string &caption, int icon)
 Vector2i Button::preferredSize(SDL_Renderer *ctx) const
 {
     int fontSize = mFontSize == -1 ? mTheme->mButtonFontSize : mFontSize;
-    float tw = const_cast<Button*>(this)->mTheme->getTextWidth("sans-bold", fontSize, mCaption.c_str());
-    float iw = 0.0f, ih = fontSize;
+    float tw = (float) const_cast<Button*>(this)->mTheme->getTextWidth("sans-bold", fontSize, mCaption.c_str());
+    float iw = 0.0f, ih = (float)fontSize;
 
     if (mIcon) 
     {
-        if (nvgIsFontIcon(mIcon)) 
+        if (nvgIsFontIcon((int)mIcon)) 
         {
             ih *= 1.5f;
-            iw = const_cast<Button*>(this)->mTheme->getUtf8Width("icons", ih, utf8(mIcon).data())  + mSize.y * 0.15f;
+            iw = (float)(const_cast<Button*>(this)->mTheme->getUtf8Width("icons", (size_t)ih, utf8((int)mIcon).data())) + mSize.y * 0.15f;
         } 
         else 
         {
@@ -297,13 +297,13 @@ void Button::draw(SDL_Renderer* renderer)
   }
 
   Vector2f center(ap.x + width() * 0.5f, ap.y + height() * 0.5f);
-  Vector2i textPos(center.x - _captionTex.w() * 0.5f, center.y - _captionTex.h() * 0.5f - 1);
+  Vector2i textPos((int)(center.x - _captionTex.w() * 0.5f), (int)(center.y - _captionTex.h() * 0.5f - 1));
   
   int offset = mPushed ? 2 : 0;
 
   if (mIcon) 
   {
-    float iw = 0, ih = fontSize;
+    float iw = 0, ih = (float) fontSize;
     auto icon = utf8(mIcon);
 
     if (_iconTex.dirty)

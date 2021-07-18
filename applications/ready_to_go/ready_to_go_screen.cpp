@@ -182,16 +182,16 @@ void display_hourly_weather_icon(Widget& layout, const std::map<std::string, SDL
         if (imageIt != icons.end())
         {
             auto imageView = layout.add<ImageView>(imageIt->second);
-            imageView->setFixedWidth(rect.size_y * scale);
-            imageView->setFixedHeight(rect.size_y * scale);
+            imageView->setFixedWidth((int)(rect.size_y * scale));
+            imageView->setFixedHeight((int)(rect.size_y * scale));
         }
     }
     else
     {
         auto imageIt = icons.find("images/Empty.png");
         auto imageView = layout.add<ImageView>(imageIt->second);
-        imageView->setFixedWidth(rect.size_y * scale);
-        imageView->setFixedHeight(rect.size_y * scale);
+        imageView->setFixedWidth((int)(rect.size_y * scale));
+        imageView->setFixedHeight((int)(rect.size_y * scale));
     }
 }
 
@@ -207,8 +207,8 @@ void display_daily_weather_icon(Widget& layout, const std::map<std::string, SDL_
     if (imageIt != icons.end())
     {
         auto imageView = layout.add<ImageView>(imageIt->second);
-        imageView->setFixedWidth(rect.size_y * scale);
-        imageView->setFixedHeight(rect.size_y * scale);
+        imageView->setFixedWidth((int)(rect.size_y * scale));
+        imageView->setFixedHeight((int)(rect.size_y * scale));
     }
 }
 
@@ -483,9 +483,9 @@ std::vector<std::string> make_string_multiline(const std::string& inputString, i
 {
     // Output structure
     std::vector<std::string> outputString;
-    int inputLength = inputString.length();
+    int inputLength = (int)inputString.length();
     int currentChar = 0;
-    while (currentChar < (inputLength- 1))
+    while (currentChar < (inputLength - 1))
     {
         int lineEndChar = min_value(currentChar + targetCharPerLine, inputLength - 1);
         while ((inputString[lineEndChar - 1] != ' ') && (lineEndChar != (inputLength - 1)))
@@ -537,7 +537,7 @@ void ReadyToGoScreen::draw(SDL_Renderer* renderer)
     std::time_t time = std::time(nullptr);
 
     bento::DynamicString labelCaption(_allocator);
-    uint32_t weatherViewports = m_timeLabels.size();
+    uint32_t weatherViewports = (uint32_t)m_timeLabels.size();
     for (uint32_t labelIdx = 0; labelIdx < weatherViewports; ++labelIdx)
     {
         auto& lbl = m_timeLabels[labelIdx];
