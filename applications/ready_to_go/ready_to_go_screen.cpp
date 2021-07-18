@@ -549,7 +549,7 @@ void ReadyToGoScreen::draw(SDL_Renderer* renderer)
     uint32_t sdlTicks = SDL_GetTicks();
 
     // We switch which graphs are displayed every 10 seconds
-    int status = sdlTicks / (1000 * 15) % 2;
+    int status = sdlTicks / (1000 * 10) % 2;
     for (uint32_t graphIdx = 0; graphIdx < weatherViewports; ++graphIdx)
     {
         auto& forecastWindows = m_forecastWindows[graphIdx];
