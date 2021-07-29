@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.2)
 
+bento_exe("allocator_tester" "applications" "allocator_tester.cpp" "${CHECKUP_SDK_INCLUDE};${CHECKUP_3RD_INCLUDE}")
+target_link_libraries("allocator_tester" "bento_sdk")
+
 bento_exe("weather_display" "applications" "weather_display.cpp" "${CHECKUP_SDK_INCLUDE};${CHECKUP_3RD_INCLUDE}")
 target_link_libraries("weather_display" "checkup_sdk" "bento_sdk" "${CURL_LIBRARIES}")
 
